@@ -63,6 +63,7 @@
     <ClInclude Include="floor.h" />
     <ClInclude Include="plate.h" />
     <ClInclude Include="slime.h" />
+    <ClInclude Include="trackball.h" />
     <ClInclude Include="wall.h" />
   </ItemGroup>
   <ItemGroup>

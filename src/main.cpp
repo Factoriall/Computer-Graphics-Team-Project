@@ -2,6 +2,9 @@
 #include "cgut.h"		// slee's OpenGL utility
 #include "camera.h"		// camera header file
 #include "wall.h"		// wall creation header file
+#include "floor.h"		// floor header file
+#include "trackball.h"	// trackball for develop
+#include "plate.h"
 
 //*************************************
 // global constants
@@ -18,6 +21,7 @@ ivec2		window_size = cg_default_window_size(); // initial window size
 //*************************************
 // OpenGL objects
 GLuint	program	= 0;	// ID holder for GPU program
+trackball	tb;			// trackball for devlopment
 
 //*************************************
 // global variables
@@ -45,6 +49,8 @@ void render()
 	glUseProgram( program );
 
 	render_wall(program);
+	render_floor(program);
+	render_cube(program);
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -63,6 +69,7 @@ void print_help()
 	printf( "[help]\n" );
 	printf( "- press ESC or 'q' to terminate the program\n" );
 	printf( "- press F1 or 'h' to see help\n" );
+	printf( "- press Home to reset camera\n" );
 	printf( "\n" );
 }
 
@@ -72,7 +79,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	{
 		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
+		else if (key == GLFW_KEY_HOME)	cam = camera();
 	}
+	
 }
 
 void mouse( GLFWwindow* window, int button, int action, int mods )
@@ -82,10 +91,39 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 		dvec2 pos; glfwGetCursorPos(window,&pos.x,&pos.y);
 		printf( "> Left mouse button pressed at (%d, %d)\n", int(pos.x), int(pos.y) );
 	}
+
+	// ------------------------------------- track ball mouse code		---------------------------------------------//							
+	if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_SHIFT)) || button == GLFW_MOUSE_BUTTON_RIGHT)
+	{
+		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+		vec2 npos = cursor_to_ndc(pos, window_size);
+		if (action == GLFW_PRESS)			tb.begin(cam.view_matrix, npos, ZOOMING);
+		else if (action == GLFW_RELEASE)	tb.end();
+	}
+	else if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_CONTROL)) || button == GLFW_MOUSE_BUTTON_MIDDLE)
+	{
+		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+		vec2 npos = cursor_to_ndc(pos, window_size);
+		if (action == GLFW_PRESS)			tb.begin(cam.view_matrix, npos, PANNING);
+		else if (action == GLFW_RELEASE)	tb.end();
+	}
+	else if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+		vec2 npos = cursor_to_ndc(pos, window_size);
+		if (action == GLFW_PRESS)			tb.begin(cam.view_matrix, npos, ROTATING);
+		else if (action == GLFW_RELEASE)	tb.end();
+	}
+	// --------------------------------------------------------------------------------------------------------------//
 }
 
 void motion( GLFWwindow* window, double x, double y )
 {
+	// ------------------------------------- track ball motion code		---------------------------------------------//	
+	if (!tb.is_tracking()) return;
+	vec2 npos = cursor_to_ndc(dvec2(x, y), window_size);
+	cam.view_matrix = tb.update(npos);
+	// --------------------------------------------------------------------------------------------------------------//
 }
 
 bool user_init()
@@ -101,7 +139,10 @@ bool user_init()
 	// load the objects we need in our project
 	std::vector<vertex> unit_wall_vertices = create_wall_vertices();
 	update_wall_vertex_buffer(unit_wall_vertices);
-
+	std::vector<vertex> unit_floor_vertices = create_floor_vertices();
+	update_floor_vertex_buffer(unit_floor_vertices);
+	std::vector<vertex> unit_rect_vertices = create_rect_vertices();
+	update_rect_vertex_buffer(unit_rect_vertices);
 
 	return true;
 }
