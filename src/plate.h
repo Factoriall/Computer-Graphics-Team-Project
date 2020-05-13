@@ -115,6 +115,8 @@ void cube_t::make_cube(vec3 _center, vec3 _scale) {
 }
 
 
+vec3 away_from_map = vec3(-0.5f,0,-1.0f);
+
 // make sample cubes
 inline std::vector<cube_t> create_cubes() {
 	std::vector<cube_t> cube_vector;
@@ -125,6 +127,13 @@ inline std::vector<cube_t> create_cubes() {
 	cube.make_cube(vec3(5, 9, 7), vec3(0.2f, 3, 2));
 	cube_vector.push_back(cube);
 	cube.make_cube(vec3(6, 4, 7), vec3(1, 0.2f, 1));
+	cube_vector.push_back(cube);
+	// 뒷 벽을 기준으로 x 가 좌우, y가 높이(y_scale = 0.1f 고정), z가 앞뒤(z=2.0f, z_scale=2.0f) 고정하면 대충 맵에 맞음
+	cube.make_cube(vec3(0.5f, 1, 2)+ away_from_map, vec3(1.0f, 0.1f, 2.0f));
+	cube_vector.push_back(cube);
+	cube.make_cube(vec3(1.0f, 3, 2) + away_from_map, vec3(1.0f, 0.1f, 2.0f));
+	cube_vector.push_back(cube);
+	cube.make_cube(vec3(0.0f, 2, 2) + away_from_map, vec3(1.0f, 0.1f, 2.0f));
 	cube_vector.push_back(cube);
 
 	return cube_vector;

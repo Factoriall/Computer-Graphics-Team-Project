@@ -4,13 +4,14 @@
 #include "wall.h"		// wall creation header file
 #include "floor.h"		// floor header file
 #include "trackball.h"	// trackball for develop
-#include "plate.h"
+#include "plate.h"		// cube
+#include "sphere.h"		// sphere
 
 //*************************************
 // global constants
 static const char*	window_name = "Team Project - Funny Game!";
 static const char*	vert_shader_path = "../bin/shaders/teamproject.vert";
-static const char* frag_shader_path = "../bin/shaders/teamproject.frag";
+static const char*  frag_shader_path = "../bin/shaders/teamproject.frag";
 
 
 //*************************************
@@ -26,6 +27,7 @@ trackball	tb;			// trackball for devlopment
 //*************************************
 // global variables
 int		frame = 0;		// index of rendering frames
+float	t = 0.0f;
 
 //*************************************
 void update()
@@ -33,6 +35,8 @@ void update()
 	// update projection matrix
 	cam.aspect_ratio = window_size.x/float(window_size.y);
 	cam.projection_matrix = mat4::perspective( cam.fovy, cam.aspect_ratio, cam.dNear, cam.dFar );
+
+	t = float(glfwGetTime());
 
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
@@ -51,6 +55,7 @@ void render()
 	render_wall(program);
 	render_floor(program);
 	render_cube(program);
+	render_sphere(program, t);
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -69,7 +74,7 @@ void print_help()
 	printf( "[help]\n" );
 	printf( "- press ESC or 'q' to terminate the program\n" );
 	printf( "- press F1 or 'h' to see help\n" );
-	printf( "- press Home to reset camera\n" );
+	printf( "- press 'Z' to reset camera\n" );
 	printf( "\n" );
 }
 
@@ -79,7 +84,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	{
 		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
-		else if (key == GLFW_KEY_HOME)	cam = camera();
+		else if (key == GLFW_KEY_Z)	cam = camera();
 	}
 	
 }
@@ -143,6 +148,8 @@ bool user_init()
 	update_floor_vertex_buffer(unit_floor_vertices);
 	std::vector<vertex> unit_rect_vertices = create_rect_vertices();
 	update_rect_vertex_buffer(unit_rect_vertices);
+	std::vector<vertex> unit_sphere_vertices = create_sphere_vertices();
+	update_sphere_vertex_buffer(unit_sphere_vertices);
 
 	return true;
 }

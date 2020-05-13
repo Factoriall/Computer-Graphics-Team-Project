@@ -5,8 +5,8 @@
 //camera structure
 struct camera
 {
-	vec3	eye = vec3(0, 120.0f, 1.0f);//camera position
-	vec3	at = vec3(0, 0, 0);//target position
+	vec3	eye = vec3(0, 4.0f, 10.0f);//camera position
+	vec3	at = vec3(0, 0.0f, 0.0f);//target position
 	vec3	up = vec3(0, 1, 0);//up
 	mat4	view_matrix = mat4::look_at(eye, at, up);
 
