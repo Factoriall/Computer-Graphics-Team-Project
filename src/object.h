@@ -7,27 +7,16 @@
 #include "stb_image.h"
 #include "createTexture.h"
 
-// constants
-static const char* plate_image_path = "../bin/images/plate.jpg";
-static const char* brick_image_path = "../bin/images/brick.jpg";
-static const char* floor_image_path = "../bin/images/floor.jpg";
-static const char* sphere_image_path = "../bin/images/earth.png";
+// const
+const uint	N = 72;									// logitute
+const uint	M = 72 / 2;								// latitute
 
 // opengl variables
 GLuint	rect_vertex_array = 0;					// ID holder for vertex array 
 GLuint	sphere_vertex_array = 0;				// ID holder for vertex array object
-GLuint	PlateTexture = 0;
-GLuint	BrickTexture = 0;
-GLuint	FloorTexture = 0;
-GLuint	SphereTexture = 0;
 
 // global variables
-vec3	away_from_map = vec3(-0.5f, 0, -1.0f);	// adjust plate to map
-bool	stop_simulation = false;
-float	paused_time = 0.0f;
 bool	b_index_buffer = true;					// index_buffering mode
-uint	N = 72;									// logitute
-uint	M = 72 / 2;								// latitute
 
 // structure 
 struct rect_t {
@@ -43,7 +32,7 @@ struct plate_t {
 	rect_t rect[6];								// cube uses 6 rectngles
 
 	mat4 model_matrix;							// modeling transformation
-	void make_cube(vec3 _center, vec3 _scale);
+	void make_plate(vec3 _center, vec3 _scale);
 };
 struct sphere_t {
 	vec3	center = vec3(0);
@@ -56,25 +45,6 @@ struct sphere_t {
 	void	collide_with_wall() {};
 	void	collide_with_cube() {};
 };
-
-// implement fuctions
-void plate_t::make_cube(vec3 _center, vec3 _scale) {
-	center = _center;
-	scale = _scale;
-
-	rect[0] = { _center - vec3(0, 0, _scale.z / 2.0f), vec2(_scale.x,_scale.y), vec3(0), 0 };
-	rect[1] = { _center - vec3(_scale.x / 2.0f, 0, 0), vec2(_scale.z, _scale.y), vec3(0, 1, 0), PI / 2 };
-	rect[2] = { _center - vec3(0, 0, _scale.z / 2.0f), vec2(_scale.x, _scale.z), vec3(1, 0, 0), PI / 2 };
-	rect[3] = { _center + vec3(_scale.x / 2.0f, 0, 0), vec2(_scale.z, _scale.y), vec3(0, 1, 0),  PI / 2 };
-	rect[4] = { _center - vec3(0, -_scale.y, _scale.z / 2.0f), vec2(_scale.x, _scale.z), vec3(1, 0, 0), PI / 2 };
-	rect[5] = { _center + vec3(0, 0, _scale.z / 2.0f), vec2(_scale.x,_scale.y), vec3(0), 0 };
-}
-void sphere_t::update(float t) {
-	model_matrix = mat4::translate(center) *
-		mat4::rotate(vec3(1, 0, 0), angle.y) *
-		mat4::rotate(vec3(0, 1, 0), angle.x) *
-		mat4::scale(radius);
-}
 
 // create vertex vector
 std::vector<vertex> create_rect_vertices() // create vertices of the wall - rectangle
@@ -156,10 +126,6 @@ void update_rect_vertex_buffer(const std::vector<vertex>& vertices) // function 
 	rect_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!rect_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
 
-	// texture assign
-	PlateTexture = create_texture(plate_image_path, true);
-	BrickTexture = create_texture(brick_image_path, true);
-	FloorTexture = create_texture(floor_image_path, true);
 }
 void update_sphere_vertex_buffer(const std::vector<vertex>& vertices) // function to update the wall_vertex_buffer
 {
@@ -246,11 +212,9 @@ void update_sphere_vertex_buffer(const std::vector<vertex>& vertices) // functio
 	if (sphere_vertex_array) glDeleteVertexArrays(1, &sphere_vertex_array);
 	sphere_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!sphere_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
-	
-	SphereTexture = create_texture(sphere_image_path, true);
 }
 
-// render rectangle, no change
+// render function
 void render_rect(GLuint program, rect_t& rect, GLuint texture) {
 
 	glBindVertexArray(rect_vertex_array);
@@ -267,121 +231,6 @@ void render_rect(GLuint program, rect_t& rect, GLuint texture) {
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
-}
-void render_cube(GLuint program, std::vector<plate_t> & cubes) {
-	for (auto& c : cubes) {
-		for (rect_t r : c.rect) {
-			render_rect(program, r, PlateTexture);
-		}
-	}
-}
-void render_wall(GLuint program, std::vector<rect_t> & walls) {
-	glBindVertexArray(rect_vertex_array);
-
-	if (BrickTexture != 0) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, BrickTexture);
-		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
-	}
-
-	for (auto& w : walls) {//move the walls using the information inside the walls struct
-		mat4 model_matrix = mat4::translate(w.center) *
-			mat4::rotate(w.axle, w.angle) *
-			mat4::scale(w.scale.x, w.scale.y, 0);
-
-		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
-		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
-	}
-}
-void render_floor(GLuint program, std::vector<rect_t> & floors) {
-	glBindVertexArray(rect_vertex_array);
-
-	if (FloorTexture != 0) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, FloorTexture);
-		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
-	}
-
-	for (auto& w : floors) {//move the walls using the information inside the walls struct
-		mat4 model_matrix = mat4::translate(w.center) *
-			mat4::rotate(w.axle, w.angle) *
-			mat4::scale(w.scale.x, w.scale.y, 0);
-
-		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
-		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
-	}
-}
-void render_sphere(GLuint program, std::vector<sphere_t> & spheres, float t) {
-	glBindVertexArray(sphere_vertex_array);
-
-	if (SphereTexture != 0) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, SphereTexture);
-		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
-	}
-
-	for (auto& sphere : spheres) {//move the walls using the information inside the walls struct
-		sphere.update(t);
-
-		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, sphere.model_matrix);
-		if (b_index_buffer)	glDrawElements(GL_TRIANGLES, M * (N * 3 + 3) * 2, GL_UNSIGNED_INT, nullptr);
-		else				glDrawArrays(GL_TRIANGLES, 0, M * (N * 3 + 3) * 2);
-	}
-}
-// initialize cube structure with position of center coordinate and scale of cube, no change
-
-// creating object functions
-inline std::vector<plate_t> create_cubes() {
-	std::vector<plate_t> cube_vector;
-	plate_t cube;
-
-	cube.make_cube(vec3(5, 5, 5), vec3(1, 1, 2));
-	cube_vector.push_back(cube);
-	cube.make_cube(vec3(5, 9, 7), vec3(0.2f, 3, 2));
-	cube_vector.push_back(cube);
-	cube.make_cube(vec3(6, 4, 7), vec3(1, 0.2f, 1));
-	cube_vector.push_back(cube);
-	// 뒷 벽을 기준으로 x 가 좌우, y가 높이(y_scale = 0.1f 고정), z가 앞뒤(z=2.0f, z_scale=2.0f) 고정하면 대충 맵에 맞음
-	cube.make_cube(vec3(0.5f, 1, 2) + away_from_map, vec3(1.0f, 0.1f, 2.0f));
-	cube_vector.push_back(cube);
-	cube.make_cube(vec3(1.0f, 3, 2) + away_from_map, vec3(1.0f, 0.1f, 2.0f));
-	cube_vector.push_back(cube);
-	cube.make_cube(vec3(0.0f, 2, 2) + away_from_map, vec3(1.0f, 0.1f, 2.0f));
-	cube_vector.push_back(cube);
-
-	return cube_vector;
-}
-inline std::vector<rect_t> create_walls() //function to save the information about walls - 3 walls
-{
-	std::vector<rect_t> walls;
-	rect_t w;
-
-	w = { vec3(0), vec2(2.0f, 15.0f), vec3(0, 1.0f, 0), 0 };
-	walls.emplace_back(w);
-	w = { vec3(-1.0f, 0, 1.0f), vec2(2.0f, 15.0f), vec3(0, 1.0f, 0), PI / 2.0f };
-	walls.emplace_back(w);
-	w = { vec3(1.0f, 0, 1.0f), vec2(2.0f, 15.0f), vec3(0, 1.0f, 0), (PI * 3.0f) / 2.0f };
-	walls.emplace_back(w);
-
-	return walls;
-}
-inline std::vector<rect_t> create_floors() //function to save the information about walls - 3 walls
-{
-	std::vector<rect_t> floors;
-	rect_t f;
-
-	f = { vec3(0), vec2(2.0f, 2.0f), vec3(1.0f, 0, 0), PI / 2.0f };
-	floors.emplace_back(f);
-
-
-	return floors;
-}
-inline std::vector<sphere_t> create_spheres() {
-	std::vector<sphere_t> sphere;
-	sphere_t s = { vec3(0.0f, 0.3f, 1.0f), 0.3f, vec2(0, 0) };
-	sphere.push_back(s);
-
-	return sphere;
 }
 
 #endif

@@ -2,7 +2,10 @@
 #include "cgut.h"		// slee's OpenGL utility
 #include "camera.h"		// camera header file
 #include "trackball.h"	// trackball for develop
-#include "object.h"		// object
+#include "floor.h"		// floor
+#include "plate.h"		// plate
+#include "sphere.h"		// sphere
+#include "wall.h"		// wall
 
 
 //*************************************
@@ -25,7 +28,7 @@ trackball	tb;			// trackball for devlopment
 // global variables
 int		frame = 0;		// index of rendering frames
 float	t = 0.0f;
-auto	cubes = std::move(create_cubes());
+auto	plates = std::move(create_plates());
 auto	walls = std::move(create_walls());
 auto	floors = std::move(create_floors());
 auto	spheres = std::move(create_spheres());
@@ -55,7 +58,7 @@ void render()
 
 	render_wall(program, walls);
 	render_floor(program, floors);
-	render_cube(program, cubes);
+	render_plate(program, plates);
 	render_sphere(program, spheres, t);
 
 	// swap front and back buffers, and display to screen
@@ -148,7 +151,13 @@ bool user_init()
 	update_rect_vertex_buffer(unit_rect_vertices);
 	std::vector<vertex> unit_sphere_vertices = create_sphere_vertices();
 	update_sphere_vertex_buffer(unit_sphere_vertices);
-	
+
+	// assign texture to each components.
+	PlateTexture = create_texture(plate_image_path, true);
+	SphereTexture = create_texture(sphere_image_path, true);
+	WallTexture = create_texture(brick_image_path, true);
+	FloorTexture = create_texture(floor_image_path, true);
+
 	return true;
 }
 
