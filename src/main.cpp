@@ -1,21 +1,15 @@
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include "createTexture.h"
 #include "camera.h"		// camera header file
-#include "wall.h"		// wall creation header file
-#include "floor.h"		// floor header file
 #include "trackball.h"	// trackball for develop
-#include "plate.h"		// cube
-#include "sphere.h"		// sphere
+#include "object.h"		// object
+
 
 //*************************************
 // global constants
 static const char*	window_name = "Team Project - Funny Game!";
 static const char*	vert_shader_path = "../bin/shaders/teamproject.vert";
 static const char*  frag_shader_path = "../bin/shaders/teamproject.frag";
-
 
 //*************************************
 // window objects
@@ -31,6 +25,10 @@ trackball	tb;			// trackball for devlopment
 // global variables
 int		frame = 0;		// index of rendering frames
 float	t = 0.0f;
+auto	cubes = std::move(create_cubes());
+auto	walls = std::move(create_walls());
+auto	floors = std::move(create_floors());
+auto	spheres = std::move(create_spheres());
 
 //*************************************
 void update()
@@ -55,10 +53,10 @@ void render()
 	// notify GL that we use our own program
 	glUseProgram( program );
 
-	render_wall(program);
-	render_floor(program);
-	render_cube(program);
-	render_sphere(program, t);
+	render_wall(program, walls);
+	render_floor(program, floors);
+	render_cube(program, cubes);
+	render_sphere(program, spheres, t);
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -89,7 +87,6 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
 		else if (key == GLFW_KEY_Z)	cam = camera();
 	}
-	
 }
 
 void mouse( GLFWwindow* window, int button, int action, int mods )
@@ -147,10 +144,6 @@ bool user_init()
 	glActiveTexture(GL_TEXTURE0);							// notify GL the current texture slot is 0
 
 	// load the objects we need in our project
-	std::vector<vertex> unit_wall_vertices = create_wall_vertices();
-	update_wall_vertex_buffer(unit_wall_vertices);
-	std::vector<vertex> unit_floor_vertices = create_floor_vertices();
-	update_floor_vertex_buffer(unit_floor_vertices);
 	std::vector<vertex> unit_rect_vertices = create_rect_vertices();
 	update_rect_vertex_buffer(unit_rect_vertices);
 	std::vector<vertex> unit_sphere_vertices = create_sphere_vertices();

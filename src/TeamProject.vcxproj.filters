@@ -28,16 +28,7 @@
     <ClInclude Include="cgut.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="floor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="plate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="slime.h">
@@ -46,10 +37,10 @@
     <ClInclude Include="trackball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sphere.h">
+    <ClInclude Include="createTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="createTexture.h">
+    <ClInclude Include="object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
