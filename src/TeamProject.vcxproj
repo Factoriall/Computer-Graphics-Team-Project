@@ -61,10 +61,11 @@
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />
     <ClInclude Include="createTexture.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="plate.h" />
-    <ClInclude Include="sphere.h" />
     <ClInclude Include="slime.h" />
+    <ClInclude Include="sphere.h" />
     <ClInclude Include="trackball.h" />
     <ClInclude Include="wall.h" />
   </ItemGroup>

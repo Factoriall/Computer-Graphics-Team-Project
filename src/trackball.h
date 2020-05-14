@@ -64,8 +64,8 @@ inline mat4 trackball::update(vec2 m) const
 		return  view_matrix0 * mat4::scale(vec3(s, s, s));
 	}
 	else if (md == PANNING) {
-		mat4 temp = mat4(1, 0, 0, p1.x * 50.0f,
-			0, 1, 0, p1.y * 50.0f,
+		mat4 temp = mat4(1, 0, 0, p1.x * 30.0f,
+			0, 1, 0, p1.y * 30.0f,
 			0, 0, 1, 0,
 			0, 0, 0, 1);
 		return temp * view_matrix0;
