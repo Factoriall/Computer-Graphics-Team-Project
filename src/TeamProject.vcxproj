@@ -60,6 +60,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />
+    <ClInclude Include="createTexture.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="plate.h" />
     <ClInclude Include="sphere.h" />

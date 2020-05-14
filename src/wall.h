@@ -4,6 +4,9 @@
 #include "camera.h"
 
 GLuint	wall_vertex_array = 0;	// ID holder for vertex array object
+GLuint	BrickTexture = 0;
+
+static const char* brick_image_path = "../bin/images/brick.jpg";
 
 struct wall_t
 {
@@ -19,12 +22,13 @@ inline std::vector<wall_t> create_walls()//function to save the information abou
 	std::vector<wall_t> walls;
 	wall_t w;
 	
-	w = { vec3(0), 15.0f, 2.0f, 0.0f};
+	w = { vec3(0), 15.0f, 2.0f, 0.0f };
 	walls.emplace_back(w);
 	w = { vec3(-1.0f, 0, 1.0f), 15.0f, 2.0f, PI / 2.0f };
 	walls.emplace_back(w);
-	w = { vec3(1.0f, 0, 1.0f), 15.0f, 2.0f, (PI * 3.0f) / 2.0f };
+	w = { vec3(1.0f, 0, 1.0f), 15.0f, 2.0f, (PI * 3.0f) / 2.0f};
 	walls.emplace_back(w);
+
 
 	return walls;
 }
@@ -35,10 +39,10 @@ std::vector<vertex> create_wall_vertices() // create vertices of the wall - rect
 {
 	std::vector<vertex> v = { { vec3(0), vec3(1), vec2(1) } };
 	
-	v.push_back({ vec3(-0.5f,0.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(0.5f,0.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(-0.5f,1.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(0.5f,1.0f, 0.0f), vec3(1), vec2(1) });
+	v.push_back({ vec3(-0.5f,0.0f, 0.0f), vec3(1), vec2(0.0f, 0.0f) });
+	v.push_back({ vec3(0.5f,0.0f, 0.0f), vec3(1), vec2(1.0f, 0.0f) });
+	v.push_back({ vec3(-0.5f,1.0f, 0.0f), vec3(1), vec2(0.0f, 1.0f) });
+	v.push_back({ vec3(0.5f,1.0f, 0.0f), vec3(1), vec2(1.0f, 1.0f) });
 
 	return v;
 }
@@ -65,6 +69,14 @@ void update_wall_vertex_buffer(const std::vector<vertex>& vertices) // function 
 	indices.push_back(2);
 	indices.push_back(4);
 	indices.push_back(3);
+
+	indices.push_back(1);
+	indices.push_back(3);
+	indices.push_back(2);
+
+	indices.push_back(2);
+	indices.push_back(3);
+	indices.push_back(4);
 	
 	// generation of vertex buffer: use vertices as it is
 	glGenBuffers(1, &vertex_buffer);
@@ -82,18 +94,26 @@ void update_wall_vertex_buffer(const std::vector<vertex>& vertices) // function 
 	if (wall_vertex_array) glDeleteVertexArrays(1, &wall_vertex_array);
 	wall_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!wall_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+
+	BrickTexture = create_texture(brick_image_path, true);
 }
 
 void render_wall(GLuint program) {
 	glBindVertexArray(wall_vertex_array);
 
+	if (BrickTexture != 0) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, BrickTexture);
+		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
+	}
+
 	for (auto& w : walls) {//move the walls using the information inside the walls struct
 		mat4 model_matrix = mat4::translate(w.center) *
-							mat4::rotate(vec3(0, 1, 0), w.angle) *
-							mat4::scale(w.width, w.height, 0);
+			mat4::rotate(vec3(0, 1, 0), w.angle) *
+			mat4::scale(w.width, w.height, 0);
 
 		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
 	}
 }
 

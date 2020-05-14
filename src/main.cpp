@@ -1,5 +1,8 @@
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include "createTexture.h"
 #include "camera.h"		// camera header file
 #include "wall.h"		// wall creation header file
 #include "floor.h"		// floor header file
@@ -140,6 +143,8 @@ bool user_init()
 	glClearColor( 39/255.0f, 40/255.0f, 34/255.0f, 1.0f );	// set clear color
 	glEnable( GL_CULL_FACE );								// turn on backface culling
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
+	glEnable(GL_TEXTURE_2D);								// enable texturing
+	glActiveTexture(GL_TEXTURE0);							// notify GL the current texture slot is 0
 
 	// load the objects we need in our project
 	std::vector<vertex> unit_wall_vertices = create_wall_vertices();
@@ -150,7 +155,7 @@ bool user_init()
 	update_rect_vertex_buffer(unit_rect_vertices);
 	std::vector<vertex> unit_sphere_vertices = create_sphere_vertices();
 	update_sphere_vertex_buffer(unit_sphere_vertices);
-
+	
 	return true;
 }
 

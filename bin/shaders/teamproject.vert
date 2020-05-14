@@ -9,6 +9,7 @@ uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 
 out vec3 norm;
+out vec2 tc;
 
 void main()
 {
@@ -19,4 +20,5 @@ void main()
 
 	// pass eye-coordinate normal to fragment shader
 	norm = normalize(mat3(view_matrix*model_matrix)*normal);
+	tc = texcoord;
 }

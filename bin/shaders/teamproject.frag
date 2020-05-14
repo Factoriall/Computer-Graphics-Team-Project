@@ -7,11 +7,17 @@
 
 // input from vertex shader
 in vec3 norm;
+in vec2 tc;
 
 // the only output variable
 out vec4 fragColor;
 
+uniform sampler2D	TEX;
+
 void main()
 {
-	fragColor = vec4(norm,0);
+	//if(TEX == null)
+		//fragColor = vec4(norm,0);
+	//else
+	fragColor = texture(TEX, tc);
 }

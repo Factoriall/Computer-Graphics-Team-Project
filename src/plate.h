@@ -2,15 +2,19 @@
 #ifndef __PLATE_H__
 #define __PLATE_H__
 
-GLuint	rect_vertex_array = 0;	// ID holder for vertex array object
+GLuint	rect_vertex_array = 0;	// ID holder for vertex array 
+GLuint	RectTexture = 0;
+
+static const char* plate_image_path = "../bin/images/plate.jpg";
 
 
 // my rectangle
 struct rect_t {
-	vec3 center;
-	vec2 scale;
-	vec3 axle;
-	float angle;
+	vec3	center;
+	vec2	scale;
+	vec3	axle;
+	float	angle;
+	GLuint	texture = NULL;
 };
 
 
@@ -30,10 +34,10 @@ std::vector<vertex> create_rect_vertices() // create vertices of the wall - rect
 {
 	std::vector<vertex> v = { { vec3(0), vec3(1), vec2(1) } };
 
-	v.push_back({ vec3(-0.5f,0.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(0.5f,0.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(-0.5f,1.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(0.5f,1.0f, 0.0f), vec3(1), vec2(1) });
+	v.push_back({ vec3(-0.5f,0.0f, 0.0f), vec3(1), vec2(0.0f, 0.0f) });
+	v.push_back({ vec3(0.5f,0.0f, 0.0f), vec3(1), vec2(1.0f, 0.0f) });
+	v.push_back({ vec3(-0.5f,1.0f, 0.0f), vec3(1), vec2(0.0f, 1.0f) });
+	v.push_back({ vec3(0.5f,1.0f, 0.0f), vec3(1), vec2(1.0f, 1.0f) });
 
 	return v;
 }
@@ -86,11 +90,20 @@ void update_rect_vertex_buffer(const std::vector<vertex>& vertices) // function 
 	if (rect_vertex_array) glDeleteVertexArrays(1, &rect_vertex_array);
 	rect_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!rect_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+
+	RectTexture = create_texture(plate_image_path, true);
 }
 
 // render rectangle, no change
 void render_rect(GLuint program, rect_t* rect) {
+
 	glBindVertexArray(rect_vertex_array);
+
+	if (RectTexture != 0) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, RectTexture);
+		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
+	}
 
 	mat4 model_matrix = mat4::translate(rect->center) *
 		mat4::rotate(rect->axle, rect->angle) *
@@ -151,8 +164,5 @@ void render_cube(GLuint program) {
 		}
 	}
 }
-
-
-
 
 #endif

@@ -3,6 +3,10 @@
 #include "cgmath.h"
 
 GLuint	sphere_vertex_array = 0;	// ID holder for vertex array object
+GLuint	sphereTexture = 0;
+
+static const char* sphere_image_path = "../bin/images/earth.png";
+
 bool stop_simulation = false;
 float paused_time = 0.0f;
 bool	b_index_buffer = true;		// index_buffering mode
@@ -146,11 +150,18 @@ void update_sphere_vertex_buffer(const std::vector<vertex>& vertices) // functio
 	if (sphere_vertex_array) glDeleteVertexArrays(1, &sphere_vertex_array);
 	sphere_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!sphere_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return ; }
+
+	sphereTexture = create_texture(sphere_image_path, true);
 }
 
 void render_sphere(GLuint program, float t) {
 	glBindVertexArray(sphere_vertex_array);
 
+	if (sphereTexture != 0) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, sphereTexture);
+		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
+	}
 	
 	for (auto& sphere : spheres) {//move the walls using the information inside the walls struct
 		sphere.update(t);

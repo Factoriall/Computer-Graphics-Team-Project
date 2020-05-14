@@ -3,6 +3,9 @@
 #define __FLOOR_H__
 
 GLuint	floor_vertex_array = 0;	// ID holder for vertex array object
+GLuint	FloorTexture = 0;
+
+static const char* floor_image_path = "../bin/images/floor.jpg";
 
 struct floor_t
 {
@@ -31,10 +34,10 @@ std::vector<vertex> create_floor_vertices() // create vertices of the wall - rec
 {
 	std::vector<vertex> v = { { vec3(0), vec3(1), vec2(1) } };
 
-	v.push_back({ vec3(-0.5f,0.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(0.5f,0.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(-0.5f,1.0f, 0.0f), vec3(1), vec2(1) });
-	v.push_back({ vec3(0.5f,1.0f, 0.0f), vec3(1), vec2(1) });
+	v.push_back({ vec3(-0.5f,0.0f, 0.0f), vec3(1), vec2(0.0f, 0.0f) });
+	v.push_back({ vec3(0.5f,0.0f, 0.0f), vec3(1), vec2(1.0f, 0.0f) });
+	v.push_back({ vec3(-0.5f,1.0f, 0.0f), vec3(1), vec2(0.0f, 1.0f) });
+	v.push_back({ vec3(0.5f,1.0f, 0.0f), vec3(1), vec2(1.0f, 1.0f) });
 
 	return v;
 }
@@ -62,6 +65,14 @@ void update_floor_vertex_buffer(const std::vector<vertex>& vertices) // function
 	indices.push_back(3);
 	indices.push_back(4);
 
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(3);
+
+	indices.push_back(2);
+	indices.push_back(4);
+	indices.push_back(3);
+
 	// generation of vertex buffer: use vertices as it is
 	glGenBuffers(1, &vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -78,10 +89,18 @@ void update_floor_vertex_buffer(const std::vector<vertex>& vertices) // function
 	if (floor_vertex_array) glDeleteVertexArrays(1, &floor_vertex_array);
 	floor_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!floor_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+
+	FloorTexture = create_texture(floor_image_path, true);
 }
 
 void render_floor(GLuint program) {
 	glBindVertexArray(floor_vertex_array);
+
+	if (FloorTexture != 0) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, FloorTexture);
+		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
+	}
 
 	for (auto& f : floors) {//move the walls using the information inside the walls struct
 		mat4 model_matrix = mat4::translate(f.center) *
@@ -89,7 +108,7 @@ void render_floor(GLuint program) {
 			mat4::scale(f.width, f.height, 0);
 
 		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
 	}
 }
 
