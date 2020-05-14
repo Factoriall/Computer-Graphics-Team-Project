@@ -14,7 +14,6 @@ struct rect_t {
 	vec2	scale;
 	vec3	axle;
 	float	angle;
-	GLuint	texture = NULL;
 };
 
 
