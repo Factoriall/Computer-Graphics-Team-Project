@@ -32,20 +32,22 @@ auto	plates = std::move(create_plates());
 auto	walls = std::move(create_walls());
 auto	floors = std::move(create_floors());
 auto	spheres = std::move(create_spheres());
+bool	is_debug_mode = false;
+camera  *cam_now = &cam_for_play;
 
 //*************************************
 void update()
 {
 	// update projection matrix
-	cam.aspect_ratio = window_size.x/float(window_size.y);
-	cam.projection_matrix = mat4::perspective( cam.fovy, cam.aspect_ratio, cam.dNear, cam.dFar );
-
+	cam_now->aspect_ratio = window_size.x/float(window_size.y);
+	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar );
+	// cam_for_play.eye = vec3(0, 4.0f, 10.0f);
 	t = float(glfwGetTime());
 
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
-	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.view_matrix );		// update the view matrix (covered later in viewing lecture)
-	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.projection_matrix );	// update the projection matrix (covered later in viewing lecture)
+	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam_now->view_matrix );		// update the view matrix (covered later in viewing lecture)
+	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam_now->projection_matrix );	// update the projection matrix (covered later in viewing lecture)
 }
 
 void render()
@@ -78,7 +80,8 @@ void print_help()
 	printf( "[help]\n" );
 	printf( "- press ESC or 'q' to terminate the program\n" );
 	printf( "- press F1 or 'h' to see help\n" );
-	printf( "- press 'Z' to reset camera\n" );
+	printf( "- press 'Z' to reset camera (debug mode only)\n" );
+	printf("- press 'TAB' to switch debug mode\n");
 	printf( "\n" );
 }
 
@@ -88,7 +91,17 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	{
 		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
-		else if (key == GLFW_KEY_Z)	cam = camera();
+		else if (key == GLFW_KEY_Z && is_debug_mode)	cam_for_dev = camera();
+		else if (key == GLFW_KEY_TAB) {
+			if (is_debug_mode) {
+				cam_now = &cam_for_play;
+			}
+			else {
+				cam_now = &cam_for_dev;
+			}
+			is_debug_mode = !is_debug_mode;
+			printf(" > mode change : %s mode now\n", is_debug_mode ? "debug" : "play" );
+		}
 	}
 }
 
@@ -100,38 +113,45 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 		printf( "> Left mouse button pressed at (%d, %d)\n", int(pos.x), int(pos.y) );
 	}
 
-	// ------------------------------------- track ball mouse code		---------------------------------------------//							
-	if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_SHIFT)) || button == GLFW_MOUSE_BUTTON_RIGHT)
-	{
-		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
-		vec2 npos = cursor_to_ndc(pos, window_size);
-		if (action == GLFW_PRESS)			tb.begin(cam.view_matrix, npos, ZOOMING);
-		else if (action == GLFW_RELEASE)	tb.end();
+	if (is_debug_mode) {
+		// ------------------------------------- track ball mouse code		---------------------------------------------//							
+		if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_SHIFT)) || button == GLFW_MOUSE_BUTTON_RIGHT)
+		{
+			dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+			vec2 npos = cursor_to_ndc(pos, window_size);
+			if (action == GLFW_PRESS)			tb.begin(cam_for_dev.view_matrix, npos, ZOOMING);
+			else if (action == GLFW_RELEASE)	tb.end();
+		}
+		else if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_CONTROL)) || button == GLFW_MOUSE_BUTTON_MIDDLE)
+		{
+			dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+			vec2 npos = cursor_to_ndc(pos, window_size);
+			if (action == GLFW_PRESS)			tb.begin(cam_for_dev.view_matrix, npos, PANNING);
+			else if (action == GLFW_RELEASE)	tb.end();
+		}
+		else if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+			vec2 npos = cursor_to_ndc(pos, window_size);
+			if (action == GLFW_PRESS)			tb.begin(cam_for_dev.view_matrix, npos, ROTATING);
+			else if (action == GLFW_RELEASE)	tb.end();
+		}
+		// --------------------------------------------------------------------------------------------------------------//
 	}
-	else if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_CONTROL)) || button == GLFW_MOUSE_BUTTON_MIDDLE)
-	{
-		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
-		vec2 npos = cursor_to_ndc(pos, window_size);
-		if (action == GLFW_PRESS)			tb.begin(cam.view_matrix, npos, PANNING);
-		else if (action == GLFW_RELEASE)	tb.end();
+	else {
+
 	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT)
-	{
-		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
-		vec2 npos = cursor_to_ndc(pos, window_size);
-		if (action == GLFW_PRESS)			tb.begin(cam.view_matrix, npos, ROTATING);
-		else if (action == GLFW_RELEASE)	tb.end();
-	}
-	// --------------------------------------------------------------------------------------------------------------//
 }
 
 void motion( GLFWwindow* window, double x, double y )
 {
-	// ------------------------------------- track ball motion code		---------------------------------------------//	
-	if (!tb.is_tracking()) return;
-	vec2 npos = cursor_to_ndc(dvec2(x, y), window_size);
-	cam.view_matrix = tb.update(npos);
-	// --------------------------------------------------------------------------------------------------------------//
+	if (is_debug_mode) {
+		// ------------------------------------- track ball motion code		---------------------------------------------//	
+		if (!tb.is_tracking()) return;
+		vec2 npos = cursor_to_ndc(dvec2(x, y), window_size);
+		cam_for_dev.view_matrix = tb.update(npos);
+		// --------------------------------------------------------------------------------------------------------------//
+	}
 }
 
 bool user_init()

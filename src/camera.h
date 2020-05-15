@@ -2,7 +2,7 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-//camera structure
+// camera structure
 struct camera
 {
 	vec3	eye = vec3(0, 4.0f, 10.0f);//camera position
@@ -15,10 +15,16 @@ struct camera
 	float	dNear = 1.0f;
 	float	dFar = 1000.0f;
 	mat4	projection_matrix;
+	void	update();
 };
 
-camera	cam;
+// implement fuction
+void camera::update() {
 
+}
+
+camera	cam_for_dev;
+camera	cam_for_play;
 
 #endif
 
