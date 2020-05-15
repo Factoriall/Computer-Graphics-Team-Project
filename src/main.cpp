@@ -6,6 +6,7 @@
 #include "plate.h"		// plate
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
+#include "intro.h"		// intro
 
 
 //*************************************
@@ -32,6 +33,7 @@ auto	plates = std::move(create_plates());
 auto	walls = std::move(create_walls());
 auto	floors = std::move(create_floors());
 sphere_t sphere = create_sphere();
+rect_t	introBoard = create_introBoard();
 bool	is_debug_mode = false;
 camera  *cam_now = &cam_for_play;
 float	debug_move_speed = 0.06f;
@@ -65,6 +67,7 @@ void render()
 	render_floor(program, floors);
 	render_plate(program, plates);
 	render_sphere(program, sphere, t);
+	render_introBoard(program, introBoard);
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -83,8 +86,9 @@ void print_help()
 	printf( "[help]\n" );
 	printf( "- press ESC or 'q' to terminate the program\n" );
 	printf( "- press F1 or 'h' to see help\n" );
-	printf( "- press 'Z' to reset camera (debug mode only)\n" );
+	printf("- press F2 to see how to play\n");
 	printf("- press 'TAB' to switch debug mode\n");
+	printf("- press 'Z' to reset camera (debug mode only)\n");
 	printf( "\n" );
 }
 
@@ -104,6 +108,10 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			is_debug_mode = !is_debug_mode;
 			printf(" > mode change : %s mode now\n", is_debug_mode ? "debug" : "play" );
 		}
+		else if (key == GLFW_KEY_F2) {
+			printf(" > show intro\n");
+			cam_now = &cam_intro;
+		}
 		else if (is_debug_mode || true) {
 			// debug mode only input
 			if(key == GLFW_KEY_Z) cam_for_dev = camera();
@@ -120,6 +128,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 				sphere.center += vec3(debug_move_speed, 0, 0);
 			}
 		}
+		
 	}
 }
 
@@ -195,6 +204,11 @@ bool user_init()
 	SphereTexture = create_texture(sphere_image_path, true);
 	WallTexture = create_texture(brick_image_path, true);
 	FloorTexture = create_texture(floor_image_path, true);
+	IntroTexture = create_texture(intro_image_path, true);
+
+	cam_intro.eye = vec3(30.0f, 3.75f, 9.3f);
+	cam_intro.at = vec3(30.0f, 3.75f, 0);
+	cam_intro.update();
 
 	return true;
 }

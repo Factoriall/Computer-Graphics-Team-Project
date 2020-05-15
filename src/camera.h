@@ -16,6 +16,7 @@ struct camera
 	float	dFar = 1000.0f;
 	mat4	projection_matrix;
 	void	update(vec3 sphere_center);
+	void	update();
 };
 
 // implement fuction
@@ -25,9 +26,13 @@ void camera::update(vec3 sphere_center) {
 	at = sphere_center;
 	view_matrix = mat4::look_at(eye, at, up);
 }
+void camera::update() {
+	view_matrix = mat4::look_at(eye, at, up);
+}
 
 camera	cam_for_dev;
 camera	cam_for_play;
+camera	cam_intro;
 
 #endif
 

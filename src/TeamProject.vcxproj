@@ -61,6 +61,7 @@
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />
     <ClInclude Include="createTexture.h" />
+    <ClInclude Include="intro.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="plate.h" />
