@@ -31,17 +31,20 @@ float	t = 0.0f;
 auto	plates = std::move(create_plates());
 auto	walls = std::move(create_walls());
 auto	floors = std::move(create_floors());
-auto	spheres = std::move(create_spheres());
+sphere_t sphere = create_sphere();
 bool	is_debug_mode = false;
 camera  *cam_now = &cam_for_play;
+float	debug_move_speed = 0.06f;
 
 //*************************************
 void update()
 {
+	cam_for_play.update(sphere.center);
+
 	// update projection matrix
 	cam_now->aspect_ratio = window_size.x/float(window_size.y);
 	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar );
-	// cam_for_play.eye = vec3(0, 4.0f, 10.0f);
+	
 	t = float(glfwGetTime());
 
 	// update uniform variables in vertex/fragment shaders
@@ -61,7 +64,7 @@ void render()
 	render_wall(program, walls);
 	render_floor(program, floors);
 	render_plate(program, plates);
-	render_sphere(program, spheres, t);
+	render_sphere(program, sphere, t);
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -90,8 +93,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	if(action==GLFW_PRESS)
 	{
 		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
-		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
-		else if (key == GLFW_KEY_Z && is_debug_mode)	cam_for_dev = camera();
+		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();	
 		else if (key == GLFW_KEY_TAB) {
 			if (is_debug_mode) {
 				cam_now = &cam_for_play;
@@ -101,6 +103,22 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			}
 			is_debug_mode = !is_debug_mode;
 			printf(" > mode change : %s mode now\n", is_debug_mode ? "debug" : "play" );
+		}
+		else if (is_debug_mode || true) {
+			// debug mode only input
+			if(key == GLFW_KEY_Z) cam_for_dev = camera();
+			else if (key == GLFW_KEY_W) {
+				sphere.center += vec3(0, debug_move_speed, 0);
+			}
+			else if (key == GLFW_KEY_A) {
+				sphere.center += vec3(-debug_move_speed, 0, 0);
+			}
+			else if (key == GLFW_KEY_S) {
+				sphere.center += vec3(0, -debug_move_speed, 0);
+			}
+			else if (key == GLFW_KEY_D) {
+				sphere.center += vec3(debug_move_speed, 0, 0);
+			}
 		}
 	}
 }

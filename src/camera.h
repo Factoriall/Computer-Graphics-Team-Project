@@ -15,12 +15,15 @@ struct camera
 	float	dNear = 1.0f;
 	float	dFar = 1000.0f;
 	mat4	projection_matrix;
-	void	update();
+	void	update(vec3 sphere_center);
 };
 
 // implement fuction
-void camera::update() {
-
+void camera::update(vec3 sphere_center) {
+	eye.y = sphere_center.y + 2.0f;
+	eye.z = 6.0f;
+	at = sphere_center;
+	view_matrix = mat4::look_at(eye, at, up);
 }
 
 camera	cam_for_dev;

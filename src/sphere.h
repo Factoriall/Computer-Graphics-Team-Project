@@ -22,7 +22,7 @@ void sphere_t::update(float t) {
 }
 
 // render function
-void render_sphere(GLuint program, std::vector<sphere_t>& spheres, float t) {
+void render_sphere(GLuint program, sphere_t & sphere, float t) {
 	glBindVertexArray(sphere_vertex_array);
 	
 	if (SphereTexture != 0) {
@@ -31,24 +31,16 @@ void render_sphere(GLuint program, std::vector<sphere_t>& spheres, float t) {
 		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
 	}
 
-	for (auto& sphere : spheres) {//move the walls using the information inside the walls struct
-		sphere.update(t);
+	sphere.update(t);
 
-		glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, sphere.model_matrix);
-		if (b_index_buffer)	glDrawElements(GL_TRIANGLES, M * (N * 3 + 3) * 2, GL_UNSIGNED_INT, nullptr);
-		else				glDrawArrays(GL_TRIANGLES, 0, M * (N * 3 + 3) * 2);
-	}
+	glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, sphere.model_matrix);
+	if (b_index_buffer)	glDrawElements(GL_TRIANGLES, M * (N * 3 + 3) * 2, GL_UNSIGNED_INT, nullptr);
+	else				glDrawArrays(GL_TRIANGLES, 0, M * (N * 3 + 3) * 2);
 }
 
 // creating object functions
-inline std::vector<sphere_t> create_spheres() {
-	std::vector<sphere_t> sphere;
-	
-
-	sphere_t s = { vec3(0.0f, 0.3f, 1.0f), 0.3f, vec2(0, 0) };
-	sphere.push_back(s);
-
-	return sphere;
+inline sphere_t create_sphere() {
+	return { vec3(0.0f, 0.3f, 1.0f), 0.3f, vec2(0, 0) };
 }
 
 #endif 
