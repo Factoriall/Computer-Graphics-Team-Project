@@ -40,7 +40,7 @@ void render_sphere(GLuint program, sphere_t & sphere, float t) {
 
 // creating object functions
 inline sphere_t create_sphere() {
-	return { vec3(0.0f, 0.3f, 1.0f), 0.3f, vec2(0, 0) };
+	return { vec3(0.0f, 1.0f, 1.0f), 0.3f, vec2(0, 0) };
 }
 
 #endif 

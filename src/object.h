@@ -10,6 +10,9 @@
 // const
 const uint	N = 72;									// logitute
 const uint	M = 72 / 2;								// latitute
+const float gravity = 9.8f;							// gravity
+const float e_x = 0.95f;							// elasticity_x 마찰계수도 포함
+const float e_y = 0.75f;							// elasticity_y
 
 // opengl variables
 GLuint	rect_vertex_array = 0;					// ID holder for vertex array 
@@ -37,11 +40,18 @@ struct plate_t {
 struct sphere_t {
 	vec3	center = vec3(0);
 	float	radius = 0.0f;
+
 	vec2	angle = vec2(0);
 	vec4	color = vec4(0.7f, 0.7f, 0.7f, 1.0f);
 	mat4	model_matrix;
 
+	float	x_speed = 0.0f;
+	float	y_speed = 0.0f;
+	float	accel = 0.0004f;	// 중력바꾸고싶을때
+
+	// public functions
 	void	update(float t);
+	vec3	sphere_t::moving(std::vector <rect_t> & floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates);
 	void	collide_with_wall() {};
 	void	collide_with_cube() {};
 };
@@ -127,6 +137,7 @@ void update_rect_vertex_buffer(const std::vector<vertex>& vertices) // function 
 	if (!rect_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
 
 }
+
 void update_sphere_vertex_buffer(const std::vector<vertex>& vertices) // function to update the wall_vertex_buffer
 {
 	// make sphere
@@ -232,5 +243,138 @@ void render_rect(GLuint program, rect_t& rect, GLuint texture) {
 	glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
 }
+
+bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 충돌 감지
+{
+	if (floor_y + radius > sphere_center_y)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool	wall_collide(float sphere_center_x, float wall_x, float radius)	// 뒷벽안함 ㅅㄱ
+{
+	if (abs(wall_x - sphere_center_x) < radius)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+// plate의 중점, plate의 크기, 구의 좌표값, 반지름
+bool	plate_collide_1(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [1] 발판과 충돌
+{
+	if (pl_y + plsize_y > center_y && pl_y - plsize_y < center_y &&  center_x < pl_x && pl_x-plsize_x < center_x + radius)	// [1] y 범위 조건 만족, x범위 조건 만족,  x값 충돌
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool	plate_collide_2(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [2] 발판과 충돌
+{
+	if (pl_x + plsize_x > center_x && pl_x - plsize_x < center_x && center_y < pl_y && pl_y - plsize_y < center_y + radius)	// [2] x 범위 조건 만족, y값 충돌
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool	plate_collide_3(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [3] 발판과 충돌
+{
+	if (pl_y + plsize_y > center_y && pl_y - plsize_y < center_y && center_x > pl_x && pl_x + plsize_x > center_x - radius)	
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool	plate_collide_4(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [4] 발판과 충돌
+{
+	if (pl_x + plsize_x > center_x && pl_x - plsize_x < center_x && center_y > pl_y && pl_y + plsize_y > center_y - radius)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+// 실시간 구 좌표 값 변경
+vec3	sphere_t::moving(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates)
+{
+	float floor_y = floors[0].center.y;	//y값
+
+	if (floor_collide(center.y,floor_y,radius))	//바닥과 충돌 시
+	{
+		y_speed *= -e_y;
+		x_speed *= e_x;
+		center.y = floor_y + radius;	//부르르방지
+	}
+
+	if (wall_collide(center.x, walls[1].center.x, radius))	//벽1과 충돌 시
+	{
+		x_speed *= -e_x;
+		if (center.x > walls[1].center.x)
+		{
+			center.x = walls[1].center.x + radius;
+		}
+		else {
+			center.x = walls[1].center.x - radius;
+		}
+	}
+
+	if (wall_collide(center.x, walls[2].center.x, radius))	//벽2과 충돌 시
+	{
+		x_speed *= -e_x;
+		if (center.x > walls[2].center.x)
+		{
+			center.x = walls[2].center.x + radius;
+		}
+		else {
+			center.x = walls[2].center.x - radius;
+		}
+	}
+	
+	for (auto& plates : plates)
+	{
+		float pl_x = plates.center.x;
+		float pl_y = plates.center.y;	//x,y좌표
+		float plsize_x = plates.scale.x / 2;
+		float plsize_y = plates.scale.y / 2;	//x,y크기의 1/2
+		pl_y += plsize_y;	//정중앙이 아니었던거임~~
+
+		if ( (pl_x - center.x) * (pl_x - center.x) + (pl_y - center.y) * (pl_y - center.y) > (radius + plsize_x + plsize_y) * (radius + plsize_x + plsize_y))
+		{
+			continue;
+		}
+		if (plate_collide_1(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[1]와 충돌
+		{
+			x_speed *= -e_x;
+			center.x = pl_x - plsize_x - radius;
+		}
+		if (plate_collide_2(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[2]와 충돌
+		{
+			y_speed *= -e_y;
+			x_speed *= e_x;
+			center.y = pl_y - plsize_y - radius;
+		}
+		if (plate_collide_3(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[3]와 충돌
+		{
+			x_speed *= -e_x;
+			center.x = pl_x + plsize_x + radius;
+		}
+		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[4]와 충돌
+		{
+			y_speed *= -e_y;
+			x_speed *= e_x;
+			center.y = pl_y + plsize_y + radius;
+		}
+	}
+	
+	y_speed -= accel * gravity;
+	return vec3(x_speed, y_speed, 0);
+}
+
+
 
 #endif
