@@ -47,6 +47,9 @@ void update()
 	cam_now->aspect_ratio = window_size.x/float(window_size.y);
 	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar );
 	
+	// 구 위치 수정
+	sphere.center += sphere.moving(floors,walls,plates);
+
 	t = float(glfwGetTime());
 
 	// update uniform variables in vertex/fragment shaders
@@ -62,6 +65,8 @@ void render()
 	
 	// notify GL that we use our own program
 	glUseProgram( program );
+
+
 
 	render_wall(program, walls);
 	render_floor(program, floors);
@@ -116,16 +121,20 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			// debug mode only input
 			if(key == GLFW_KEY_Z) cam_for_dev = camera();
 			else if (key == GLFW_KEY_W) {
-				sphere.center += vec3(0, debug_move_speed, 0);
+				//sphere.center += vec3(0, debug_move_speed*10, 0);
+				sphere.y_speed += 0.1f;
 			}
 			else if (key == GLFW_KEY_A) {
-				sphere.center += vec3(-debug_move_speed, 0, 0);
+				//sphere.center += vec3(-debug_move_speed*10, 0, 0);
+				sphere.x_speed -= 0.1f;
 			}
 			else if (key == GLFW_KEY_S) {
-				sphere.center += vec3(0, -debug_move_speed, 0);
+				//sphere.center += vec3(0, -debug_move_speed*10, 0);
+				sphere.y_speed -= 0.1f;
 			}
 			else if (key == GLFW_KEY_D) {
-				sphere.center += vec3(debug_move_speed, 0, 0);
+				//sphere.center += vec3(debug_move_speed*10, 0, 0);
+				sphere.x_speed += 0.1f;
 			}
 		}
 		
