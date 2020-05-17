@@ -58,6 +58,9 @@
     <ClInclude Include="intro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\teamproject.vert">

@@ -17,6 +17,7 @@ const float e_y = 0.75f;							// elasticity_y
 // opengl variables
 GLuint	rect_vertex_array = 0;					// ID holder for vertex array 
 GLuint	sphere_vertex_array = 0;				// ID holder for vertex array object
+GLuint	pointer_vertex_array = 0;				// ID holder for vertex array object
 
 // global variables
 bool	b_index_buffer = true;					// index_buffering mode
@@ -55,6 +56,13 @@ struct sphere_t {
 	void	collide_with_wall() {};
 	void	collide_with_cube() {};
 };
+struct pointer_t {
+	vec3	center = vec3(0);
+	float	scale = 0;
+	float	angle = 0;
+
+	void	update(float t, sphere_t & sp);
+};
 
 // create vertex vector
 std::vector<vertex> create_rect_vertices() // create vertices of the wall - rectangle
@@ -85,6 +93,17 @@ std::vector<vertex> create_sphere_vertices() // create vertices of the wall - re
 		}
 	}
 	return vertices;
+}
+std::vector<vertex> create_pointer_vertices()
+{
+	std::vector<vertex> v = { { vec3(0), vec3(0,0,-1.0f), vec2(0.5f) } }; // origin
+	for (uint i = 0; i <= N/2; i++)
+	{
+		float t = PI * i / float(N), c = cos(t), s = sin(t);
+		v.push_back({ vec3(s,c,0), vec3(0,0,-1.0f), vec2(s,c) * 0.5f + 0.5f });
+	}
+	v.push_back({ vec3(2.0f, 2.0f, 0), vec3(0,0,-1.0f), vec2(0.5f) });
+	return v;
 }
 
 // update rectangle vertices buffer, no change
@@ -137,7 +156,6 @@ void update_rect_vertex_buffer(const std::vector<vertex>& vertices) // function 
 	if (!rect_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
 
 }
-
 void update_sphere_vertex_buffer(const std::vector<vertex>& vertices) // function to update the wall_vertex_buffer
 {
 	// make sphere
@@ -224,6 +242,54 @@ void update_sphere_vertex_buffer(const std::vector<vertex>& vertices) // functio
 	sphere_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!sphere_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
 }
+void update_pointer_vertex_buffer(const std::vector<vertex>& vertices) // function to update the wall_vertex_buffer
+{
+	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
+	static GLuint index_buffer = 0;		// ID holder for index buffer
+
+	// clear and create new buffers
+	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
+	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
+
+	// check exceptions
+	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
+
+	// create buffers
+	std::vector<uint> indices;
+	
+	uint point_n = 38;
+	for (uint i = 2; i < point_n-1; i++) {
+		indices.push_back(i);
+		indices.push_back(i+1);
+		indices.push_back(point_n);
+
+		indices.push_back(i);
+		indices.push_back(point_n);
+		indices.push_back(i + 1);
+		
+		
+	}
+	for (uint i = 2; i < point_n; i++) {
+		
+	}
+
+	// generation of vertex buffer: use vertices as it is
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// geneation of index buffer
+	//GL_ELEMENT_ARRAY_BUFFER == INDEX_BUFFER
+	glGenBuffers(1, &index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+
+	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
+	if (pointer_vertex_array) glDeleteVertexArrays(1, &pointer_vertex_array);
+	pointer_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
+	if (!pointer_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+}
 
 // render function
 void render_rect(GLuint program, rect_t& rect, GLuint texture) {
@@ -244,6 +310,8 @@ void render_rect(GLuint program, rect_t& rect, GLuint texture) {
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
 }
 
+
+// collide fuction
 bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 충돌 감지
 {
 	if (floor_y + radius > sphere_center_y)
@@ -374,7 +442,5 @@ vec3	sphere_t::moving(std::vector <rect_t>& floors, std::vector <rect_t>& walls,
 	y_speed -= accel * gravity;
 	return vec3(x_speed, y_speed, 0);
 }
-
-
 
 #endif

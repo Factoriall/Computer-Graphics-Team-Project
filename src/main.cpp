@@ -7,6 +7,7 @@
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
 #include "intro.h"		// intro
+#include "pointer.h"	// pointer
 
 
 //*************************************
@@ -22,8 +23,8 @@ ivec2		window_size = cg_default_window_size(); // initial window size
 
 //*************************************
 // OpenGL objects
-GLuint	program	= 0;	// ID holder for GPU program
-trackball	tb;			// trackball for devlopment
+GLuint		program	= 0;				// ID holder for GPU program
+trackball	tb_dev, tb_play;			// trackball for devlopment
 
 //*************************************
 // global variables
@@ -34,9 +35,11 @@ auto	walls = std::move(create_walls());
 auto	floors = std::move(create_floors());
 sphere_t sphere = create_sphere();
 rect_t	introBoard = create_introBoard();
+pointer_t pointer = create_pointer();
 bool	is_debug_mode = false;
 camera  *cam_now = &cam_for_play;
 float	debug_move_speed = 0.06f;
+vec2	m0 = vec2(0);
 
 //*************************************
 void update()
@@ -47,11 +50,15 @@ void update()
 	cam_now->aspect_ratio = window_size.x/float(window_size.y);
 	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar );
 	
+	// 시간 비례 업데이트 구현할 것
+	t = float(glfwGetTime());
+
 	// 구 위치 수정
 	sphere.center += sphere.moving(floors,walls,plates);
 
-	t = float(glfwGetTime());
-
+	// 포인터를 구에 고정
+	pointer.center = sphere.center;
+	
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
 	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam_now->view_matrix );		// update the view matrix (covered later in viewing lecture)
@@ -66,13 +73,13 @@ void render()
 	// notify GL that we use our own program
 	glUseProgram( program );
 
-
-
 	render_wall(program, walls);
 	render_floor(program, floors);
 	render_plate(program, plates);
 	render_sphere(program, sphere, t);
 	render_introBoard(program, introBoard);
+	render_pointer(program, pointer);
+	// pointer.angle += 0.02f;
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -155,27 +162,31 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 		{
 			dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
 			vec2 npos = cursor_to_ndc(pos, window_size);
-			if (action == GLFW_PRESS)			tb.begin(cam_for_dev.view_matrix, npos, ZOOMING);
-			else if (action == GLFW_RELEASE)	tb.end();
+			if (action == GLFW_PRESS)			tb_dev.begin(cam_for_dev.view_matrix, npos, ZOOMING);
+			else if (action == GLFW_RELEASE)	tb_dev.end();
 		}
 		else if ((button == GLFW_MOUSE_BUTTON_LEFT && (mods & GLFW_MOD_CONTROL)) || button == GLFW_MOUSE_BUTTON_MIDDLE)
 		{
 			dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
 			vec2 npos = cursor_to_ndc(pos, window_size);
-			if (action == GLFW_PRESS)			tb.begin(cam_for_dev.view_matrix, npos, PANNING);
-			else if (action == GLFW_RELEASE)	tb.end();
+			if (action == GLFW_PRESS)			tb_dev.begin(cam_for_dev.view_matrix, npos, PANNING);
+			else if (action == GLFW_RELEASE)	tb_dev.end();
 		}
 		else if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
 			dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
 			vec2 npos = cursor_to_ndc(pos, window_size);
-			if (action == GLFW_PRESS)			tb.begin(cam_for_dev.view_matrix, npos, ROTATING);
-			else if (action == GLFW_RELEASE)	tb.end();
+			if (action == GLFW_PRESS)			tb_dev.begin(cam_for_dev.view_matrix, npos, ROTATING);
+			else if (action == GLFW_RELEASE)	tb_dev.end();
 		}
 		// --------------------------------------------------------------------------------------------------------------//
 	}
 	else {
-
+		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+		vec2 npos = cursor_to_ndc(pos, window_size);
+		if (action == GLFW_PRESS)			tb_dev.begin(cam_for_dev.view_matrix, npos, ROTATING);
+		else if (action == GLFW_RELEASE)	tb_dev.end();
+		
 	}
 }
 
@@ -183,10 +194,22 @@ void motion( GLFWwindow* window, double x, double y )
 {
 	if (is_debug_mode) {
 		// ------------------------------------- track ball motion code		---------------------------------------------//	
-		if (!tb.is_tracking()) return;
+		if (!tb_dev.is_tracking()) return;
 		vec2 npos = cursor_to_ndc(dvec2(x, y), window_size);
-		cam_for_dev.view_matrix = tb.update(npos);
+		cam_for_dev.view_matrix = tb_dev.update(npos);
 		// --------------------------------------------------------------------------------------------------------------//
+	}
+	else {
+		vec2 npos = cursor_to_ndc(dvec2(x, y), window_size);
+		vec4 a =  cam_now->view_matrix * vec4(sphere.center, 1);
+		vec2 t = vec2(a.x - npos.x, a.y - npos.y);
+		float theta = atan(t.y / t.x);
+		if (t.x < 0) {
+			pointer.angle = theta;
+		}
+		else {
+			pointer.angle = theta + PI;
+		}	
 	}
 }
 
@@ -207,6 +230,8 @@ bool user_init()
 	update_rect_vertex_buffer(unit_rect_vertices);
 	std::vector<vertex> unit_sphere_vertices = create_sphere_vertices();
 	update_sphere_vertex_buffer(unit_sphere_vertices);
+	std::vector<vertex> unit_pointer_vertices = create_pointer_vertices();
+	update_pointer_vertex_buffer(unit_pointer_vertices);
 
 	// assign texture to each components.
 	PlateTexture = create_texture(plate_image_path, true);
@@ -214,6 +239,7 @@ bool user_init()
 	WallTexture = create_texture(brick_image_path, true);
 	FloorTexture = create_texture(floor_image_path, true);
 	IntroTexture = create_texture(intro_image_path, true);
+	PointerTexture = create_texture(pointer_image_path, true);
 
 	cam_intro.eye = vec3(30.0f, 3.75f, 9.3f);
 	cam_intro.at = vec3(30.0f, 3.75f, 0);
