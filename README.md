@@ -1,1 +1,14 @@
-# Computer_Graphics_Team_Project
+# Computer-Graphics-Team-Project
+## 제목
+- Jumping Ball(가제)
+## 게임 목표
+- 맵 내에서 공을 튀겨서 목표 지점까지 올라가는 것이 목표  
+## 구현 내용
+- 공 및 발판, 벽에 대한 헤더파일 구현
+- 튜토리얼 화면 제작
+- 물리 엔진 구현(예정)
+  * 공과 벽과의 충돌
+  * 중력
+  * 마찰력
+- 소리 및 글자 렌더링(예정)
+  
