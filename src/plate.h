@@ -24,6 +24,13 @@ void plate_t::make_plate(vec3 _center, vec3 _scale) {
 	rect[4] = { _center - vec3(0, -_scale.y, _scale.z / 2.0f), vec2(_scale.x, _scale.z), vec3(1, 0, 0), PI / 2 };
 	rect[5] = { _center + vec3(0, 0, _scale.z / 2.0f), vec2(_scale.x,_scale.y), vec3(0), 0 };
 }
+void show_detail(plate_t p) {
+	printf("position of center %.2f, %.2f, %.2f\n", p.center.x, p.center.y, p.center.z);
+	printf("position of scale %.2f, %.2f, %.2f\n", p.scale.x, p.scale.y, p.scale.z);
+	for (auto c : p.rect) {
+		printf(" >  %.2f, %.2f, %.2f\n", c.center.x, c.center.y, c.center.z);
+	}
+}
 
 // render function
 void render_plate(GLuint program, std::vector<plate_t>& plates) {
@@ -52,6 +59,25 @@ inline std::vector<plate_t> create_plates() {
 	cube_vector.push_back(cube);
 	cube.make_plate(vec3(0.0f, 2, 2) + away_from_map, vec3(1.0f, 0.1f, 2.0f));
 	cube_vector.push_back(cube);
+
+	// test
+	cube.make_plate(vec3(3, 0, 0), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(3, 1, 0), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(3, 0, 1), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(3, 1, 1), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(4, 0, 0), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(4, 1, 0), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(4, 0, 1), vec3(1.0f));
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(4, 1, 1), vec3(1.0f));
+	cube_vector.push_back(cube);
+	
 
 	return cube_vector;
 }

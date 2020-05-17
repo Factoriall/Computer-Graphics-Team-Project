@@ -45,6 +45,12 @@ struct sphere_t {
 	void	collide_with_wall() {};
 	void	collide_with_cube() {};
 };
+struct point_t {
+	vec3	center = vec3(0);
+	float	radius = 1.0f;
+	float	scale = 1.0f;
+	float	angle = 0;
+};
 
 // create vertex vector
 std::vector<vertex> create_rect_vertices() // create vertices of the wall - rectangle
@@ -73,6 +79,16 @@ std::vector<vertex> create_sphere_vertices() // create vertices of the wall - re
 				vec3(s_theta * c_pi,s_theta * s_pi,c_theta),
 				vec2(pi / (2.0f * PI), 1 - theta / PI) });
 		}
+	}
+	return vertices;
+}
+std::vector<vertex> create_pointer_vertices() {
+	std::vector<vertex> vertices = { { vec3(0), vec3(0,0,-1.0f), vec2(0.5f) } }; // origin
+	for (int i = 0; i < N/2; i++) {
+		float theta = PI * i / float(N), c_theta = cos(theta), s_theta = sin(theta);
+		vertices.push_back({ vec3(s_theta, c_theta, 0),
+			vec3(s_theta, c_theta, 0),
+			vec2(0, 0)});
 	}
 	return vertices;
 }

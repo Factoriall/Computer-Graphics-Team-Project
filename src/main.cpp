@@ -112,6 +112,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			printf(" > show intro\n");
 			cam_now = &cam_intro;
 		}
+		else if (key == GLFW_KEY_B) {
+			show_detail(plates[4]);
+		}
 		else if (is_debug_mode || true) {
 			// debug mode only input
 			if(key == GLFW_KEY_Z) cam_for_dev = camera();
