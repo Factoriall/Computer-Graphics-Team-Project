@@ -8,6 +8,7 @@
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
 #include "intro.h"		// intro
+#include "sound.h"		// sound
 
 //*************************************
 // global constants
@@ -30,7 +31,7 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 int			frame = 0;		// index of rendering frames
 float		t = 0.0f;
 bool		is_debug_mode = false;
-
+int			collision_type = 0;
 float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
 
@@ -46,8 +47,25 @@ void update()
 	// 시간 비례 업데이트 구현할 것
 	t = float(glfwGetTime());
 
-	// 구 위치 수정
-	sphere.center += sphere.moving(floors,walls,plates);
+	// 공 충돌계산과 충돌물체 간의 사운드 재생
+	if ((collision_type = sphere.collision(floors, walls, plates)) && sphere.is_moving) {
+		if (collision_type == 1) {
+			// collide with sample
+			engine->play2D(sound_src, false);
+		}
+		else if (collision_type == 2) {
+			// collide with floor
+			engine->play2D(sound_floor_src, false);
+		}
+		else if (collision_type == 3) {
+			// collide with wall
+			engine->play2D(sound_wall_src, false);
+		}
+		else if (collision_type == 4) {
+			// collide with plate
+			engine->play2D(sound_plate_src, false);
+		}
+	}
 
 	// 포인터를 구에 고정
 	pointer.center = sphere.center;
@@ -71,7 +89,7 @@ void render()
 	render_plate(program, plates);
 	render_sphere(program, sphere, t);
 	render_introBoard(program, introBoard);
-	render_pointer(program, pointer);
+	if(!sphere.is_moving) render_pointer(program, pointer);
 	// pointer.angle += 0.02f;
 
 	// swap front and back buffers, and display to screen
@@ -117,7 +135,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			printf(" > show intro\n");
 			cam_now = &cam_intro;
 		}
-		else if (key == GLFW_KEY_SPACE) {//jump charge start
+		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) {//jump charge start
 			if(abs(sphere.x_speed) < 0.0001f && abs(sphere.y_speed) < 0.0001f)//이중점프 방지
 				jp.startTime = float(glfwGetTime());
 		}
@@ -222,6 +240,14 @@ void motion( GLFWwindow* window, double x, double y )
 
 bool user_init()
 {
+	// 사운드 설정 초기화
+	if (!sound_init()) printf("Error to initialize sound\n");
+	else {
+		// 각 음원의 볼륨 조정
+		sound_wall_src->setDefaultVolume(0.3f);
+		sound_plate_src->setDefaultVolume(0.2f);
+	}
+
 	// log hotkeys
 	print_help();
 
@@ -257,6 +283,8 @@ bool user_init()
 
 void user_finalize()
 {
+	// close the engine
+	engine->drop();
 }
 
 int main( int argc, char* argv[] )

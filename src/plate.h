@@ -40,12 +40,6 @@ inline std::vector<plate_t> create_plates() {
 	std::vector<plate_t> cube_vector;
 	plate_t cube;
 
-	cube.make_plate(vec3(5, 5, 5), vec3(1, 1, 2));
-	cube_vector.push_back(cube);
-	cube.make_plate(vec3(5, 9, 7), vec3(0.2f, 3, 2));
-	cube_vector.push_back(cube);
-	cube.make_plate(vec3(6, 4, 7), vec3(1, 0.2f, 1));
-	cube_vector.push_back(cube);
 	// 뒷 벽을 기준으로 x 가 좌우, y가 높이(y_scale = 0.1f 고정), z가 앞뒤(z=2.0f, z_scale=2.0f) 고정하면 대충 맵에 맞음
 	cube.make_plate(vec3(0.0f, 3, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f));
 	cube_vector.push_back(cube);

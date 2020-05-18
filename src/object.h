@@ -50,11 +50,11 @@ struct sphere_t {
 	float	y_speed = 0.0f;
 	float	accel = 0.0004f;	// 중력바꾸고싶을때
 
+	bool	is_moving = false;
+
 	// public functions
 	void	update(float t);
-	vec3	sphere_t::moving(std::vector <rect_t> & floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates);
-	void	collide_with_wall() {};
-	void	collide_with_cube() {};
+	int 	sphere_t::collision(std::vector <rect_t> & floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates);
 };
 
 
@@ -299,7 +299,6 @@ void render_rect(GLuint program, rect_t& rect, GLuint texture) {
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
 }
 
-
 // collide fuction
 bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 충돌 감지
 {
@@ -309,7 +308,6 @@ bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 
 	}
 	return 0;
 }
-
 bool	wall_collide(float sphere_center_x, float wall_x, float radius)	// 뒷벽안함 ㅅㄱ
 {
 	if (abs(wall_x - sphere_center_x) < radius)
@@ -328,7 +326,6 @@ bool	plate_collide_1(float pl_x, float pl_y, float plsize_x, float plsize_y, flo
 	}
 	return 0;
 }
-
 bool	plate_collide_2(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [2] 발판과 충돌
 {
 	if (pl_x + plsize_x > center_x && pl_x - plsize_x < center_x && center_y < pl_y && pl_y - plsize_y < center_y + radius)	// [2] x 범위 조건 만족, y값 충돌
@@ -337,7 +334,6 @@ bool	plate_collide_2(float pl_x, float pl_y, float plsize_x, float plsize_y, flo
 	}
 	return 0;
 }
-
 bool	plate_collide_3(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [3] 발판과 충돌
 {
 	if (pl_y + plsize_y > center_y && pl_y - plsize_y < center_y && center_x > pl_x && pl_x + plsize_x > center_x - radius)	
@@ -346,7 +342,6 @@ bool	plate_collide_3(float pl_x, float pl_y, float plsize_x, float plsize_y, flo
 	}
 	return 0;
 }
-
 bool	plate_collide_4(float pl_x, float pl_y, float plsize_x, float plsize_y, float center_x, float center_y, float radius)	// [4] 발판과 충돌
 {
 	if (pl_x + plsize_x > center_x && pl_x - plsize_x < center_x && center_y > pl_y && pl_y + plsize_y > center_y - radius)
@@ -356,16 +351,18 @@ bool	plate_collide_4(float pl_x, float pl_y, float plsize_x, float plsize_y, flo
 	return 0;
 }
 
-// 실시간 구 좌표 값 변경
-vec3	sphere_t::moving(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates)
+// 실시간 구 좌표 값 변경 && 구 충돌 구현
+int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates)
 {
 	float floor_y = floors[0].center.y;	//y값
+	int   is_collide = 0;
 
 	if (floor_collide(center.y,floor_y,radius))	//바닥과 충돌 시
 	{
 		y_speed *= -e_y;
 		x_speed *= e_x;
 		center.y = floor_y + radius;	//부르르방지
+		is_collide = 2;
 	}
 
 	if (wall_collide(center.x, walls[1].center.x, radius))	//벽1과 충돌 시
@@ -378,6 +375,7 @@ vec3	sphere_t::moving(std::vector <rect_t>& floors, std::vector <rect_t>& walls,
 		else {
 			center.x = walls[1].center.x - radius;
 		}
+		is_collide = 3;
 	}
 
 	if (wall_collide(center.x, walls[2].center.x, radius))	//벽2과 충돌 시
@@ -390,6 +388,7 @@ vec3	sphere_t::moving(std::vector <rect_t>& floors, std::vector <rect_t>& walls,
 		else {
 			center.x = walls[2].center.x - radius;
 		}
+		is_collide = 3;
 	}
 	
 	for (auto& plates : plates)
@@ -408,28 +407,40 @@ vec3	sphere_t::moving(std::vector <rect_t>& floors, std::vector <rect_t>& walls,
 		{
 			x_speed *= -e_x;
 			center.x = pl_x - plsize_x - radius;
+			is_collide = 4;
 		}
 		if (plate_collide_2(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[2]와 충돌
 		{
 			y_speed *= -e_y;
 			x_speed *= e_x;
 			center.y = pl_y - plsize_y - radius;
+			is_collide = 4;
 		}
 		if (plate_collide_3(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[3]와 충돌
 		{
 			x_speed *= -e_x;
 			center.x = pl_x + plsize_x + radius;
+			is_collide = 4;
 		}
 		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[4]와 충돌
 		{
 			y_speed *= -e_y;
 			x_speed *= e_x;
 			center.y = pl_y + plsize_y + radius;
+			is_collide = 4;
 		}
 	}
 	
 	y_speed -= accel * gravity;
-	return vec3(x_speed, y_speed, 0);
+	center += vec3(x_speed, y_speed, 0);
+
+	if (abs(x_speed) < 0.0001f && abs(y_speed) < 0.0001f && is_collide) {
+		is_moving = false;
+	}
+	else {
+		is_moving = true;
+	}
+	return is_collide;
 }
 
 #endif
