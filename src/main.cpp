@@ -4,11 +4,10 @@
 #include "trackball.h"	// trackball for develop
 #include "floor.h"		// floor
 #include "plate.h"		// plate
+#include "pointer.h"	// pointer
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
 #include "intro.h"		// intro
-#include "pointer.h"	// pointer
-
 
 //*************************************
 // global constants
@@ -28,18 +27,12 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 
 //*************************************
 // global variables
-int		frame = 0;		// index of rendering frames
-float	t = 0.0f;
-auto	plates = std::move(create_plates());
-auto	walls = std::move(create_walls());
-auto	floors = std::move(create_floors());
-sphere_t sphere = create_sphere();
-rect_t	introBoard = create_introBoard();
-pointer_t pointer = create_pointer();
-bool	is_debug_mode = false;
-camera  *cam_now = &cam_for_play;
-float	debug_move_speed = 0.06f;
-vec2	m0 = vec2(0);
+int			frame = 0;		// index of rendering frames
+float		t = 0.0f;
+bool		is_debug_mode = false;
+
+float		debug_move_speed = 0.06f;
+vec2		m0 = vec2(0);
 
 //*************************************
 void update()
@@ -124,6 +117,10 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			printf(" > show intro\n");
 			cam_now = &cam_intro;
 		}
+		else if (key == GLFW_KEY_SPACE) {//jump charge start
+			if(abs(sphere.x_speed) < 0.0001f && abs(sphere.y_speed) < 0.0001f)//이중점프 방지
+				jp.startTime = float(glfwGetTime());
+		}
 		else if (is_debug_mode || true) {
 			// debug mode only input
 			if(key == GLFW_KEY_Z) cam_for_dev = camera();
@@ -144,7 +141,13 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 				sphere.x_speed += 0.1f;
 			}
 		}
-		
+	}
+	else if (action == GLFW_RELEASE)//jump charge finish
+	{
+		if (key == GLFW_KEY_SPACE && abs(sphere.x_speed) < 0.0001f && abs(sphere.y_speed) < 0.0001f){//이중점프 방지
+			jp.endTime = float(glfwGetTime());
+			jp.jump = true;
+		}
 	}
 }
 
@@ -182,8 +185,11 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 		// --------------------------------------------------------------------------------------------------------------//
 	}
 	else {
-		dvec2 pos; glfwGetCursorPos(window, &pos.x, &pos.y);
+		dvec2 pos; 
+		glfwGetCursorPos(window, &pos.x, &pos.y);
+
 		vec2 npos = cursor_to_ndc(pos, window_size);
+		//printf("npos: (%.2f, %.2f)\n", npos.x, npos.y);
 		if (action == GLFW_PRESS)			tb_dev.begin(cam_for_dev.view_matrix, npos, ROTATING);
 		else if (action == GLFW_RELEASE)	tb_dev.end();
 		
@@ -201,15 +207,16 @@ void motion( GLFWwindow* window, double x, double y )
 	}
 	else {
 		vec2 npos = cursor_to_ndc(dvec2(x, y), window_size);
-		vec4 a =  cam_now->view_matrix * vec4(sphere.center, 1);
-		vec2 t = vec2(a.x - npos.x, a.y - npos.y);
+		vec4 a = cam_now->view_matrix * vec4(sphere.center, 1);
+		vec2 t = vec2(npos.x - a.x, npos.y - a.y);
 		float theta = atan(t.y / t.x);
-		if (t.x < 0) {
-			pointer.angle = theta;
+		if (t.x > 0) {
+			pointer.angle = theta - 0.25f*PI;
 		}
 		else {
-			pointer.angle = theta + PI;
+			pointer.angle = theta + 0.75f*PI;
 		}	
+		//printf("%.2f\n", pointer.angle);
 	}
 }
 

@@ -9,6 +9,7 @@ static const char* plate_image_path = "../bin/images/plate.jpg";
 // opengl variables
 GLuint	PlateTexture = 0;
 
+
 // global variables
 vec3	away_from_map = vec3(-0.5f, 0, -1.0f);	// adjust plate to map
 
@@ -69,5 +70,7 @@ inline std::vector<plate_t> create_plates() {
 
 	return cube_vector;
 }
+
+auto		plates = std::move(create_plates());
 
 #endif 

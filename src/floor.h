@@ -9,6 +9,7 @@ static const char* floor_image_path = "../bin/images/floor.jpg";
 // opengl variables
 GLuint	FloorTexture = 0;
 
+
 // render function
 void render_floor(GLuint program, std::vector<rect_t>& floors) {
 	glBindVertexArray(rect_vertex_array);
@@ -42,5 +43,7 @@ inline std::vector<rect_t> create_floors() //function to save the information ab
 
 	return floors;
 }
+
+auto		floors = std::move(create_floors());
 
 #endif 

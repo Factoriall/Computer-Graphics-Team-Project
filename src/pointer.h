@@ -9,6 +9,14 @@ static const char* pointer_image_path = "../bin/images/pointer.jpg";
 // opengl variables
 GLuint	PointerTexture = 0;
 
+struct pointer_t {
+	vec3	center = vec3(0);
+	float	scale = 0;
+	float	angle = 0;
+
+	void	update(sphere_t& sp);
+};
+
 // render function
 void render_pointer(GLuint program, pointer_t & pointer) {
 	glBindVertexArray(pointer_vertex_array);
@@ -27,14 +35,16 @@ void render_pointer(GLuint program, pointer_t & pointer) {
 }
 
 // implement
-void pointer_t::update(float t, sphere_t & sp) {
+void pointer_t::update(sphere_t & sp) {
 	center = sp.center;
 }
 
 // creating object functions
 inline pointer_t create_pointer() //function to save the information about walls - 3 walls
 {
-	return { vec3(0, 0.3f, 1.0f), 0.4f, 0 };
+	return { vec3(0, 0.0f, 1.0f), 0.4f, 0 };
 }
+
+pointer_t	pointer = create_pointer();
 
 #endif 

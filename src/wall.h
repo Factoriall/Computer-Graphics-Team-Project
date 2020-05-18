@@ -9,6 +9,7 @@ static const char* brick_image_path = "../bin/images/brick.jpg";
 // opengl variables
 GLuint	WallTexture = 0;
 
+
 // render function
 void render_wall(GLuint program, std::vector<rect_t>& walls) {
 	glBindVertexArray(rect_vertex_array);
@@ -44,5 +45,7 @@ inline std::vector<rect_t> create_walls() //function to save the information abo
 
 	return walls;
 }
+
+auto		walls = std::move(create_walls());
 
 #endif 
