@@ -8,11 +8,11 @@
 #include "createTexture.h"
 
 // const
-const uint	N = 72;									// logitute
-const uint	M = 72 / 2;								// latitute
-const float gravity = 9.8f;							// gravity
-const float e_x = 0.95f;							// elasticity_x 마찰계수도 포함
-const float e_y = 0.75f;							// elasticity_y
+const uint	N = 72;								// logitute
+const uint	M = 72 / 2;							// latitute
+const float gravity = 0.2f;						// gravity
+const float e_x = 0.3f;							// elasticity_x 마찰계수도 포함
+const float e_y = 0.5f;							// elasticity_y
 
 // opengl variables
 GLuint	rect_vertex_array = 0;					// ID holder for vertex array 
@@ -30,8 +30,8 @@ struct rect_t {
 	float	angle = 0;
 };
 struct plate_t {
-	vec3 center = vec3(0);				// position of center ( x, y, z )
-	vec3 scale = vec3(1.0f);		// scale of ( x-size, y-size, z-size )
+	vec3 center = vec3(0);						// position of center ( x, y, z )
+	vec3 scale = vec3(1.0f);					// scale of ( x-size, y-size, z-size )
 	float angle = 0;							// not use yet
 	rect_t rect[6];								// cube uses 6 rectngles
 
@@ -56,13 +56,7 @@ struct sphere_t {
 	void	collide_with_wall() {};
 	void	collide_with_cube() {};
 };
-struct pointer_t {
-	vec3	center = vec3(0);
-	float	scale = 0;
-	float	angle = 0;
 
-	void	update(float t, sphere_t & sp);
-};
 
 // create vertex vector
 std::vector<vertex> create_rect_vertices() // create vertices of the wall - rectangle
@@ -258,7 +252,7 @@ void update_pointer_vertex_buffer(const std::vector<vertex>& vertices) // functi
 	std::vector<uint> indices;
 	
 	uint point_n = 38;
-	for (uint i = 2; i < point_n-1; i++) {
+	for (uint i = 1; i < point_n-1; i++) {
 		indices.push_back(i);
 		indices.push_back(i+1);
 		indices.push_back(point_n);
@@ -266,11 +260,6 @@ void update_pointer_vertex_buffer(const std::vector<vertex>& vertices) // functi
 		indices.push_back(i);
 		indices.push_back(point_n);
 		indices.push_back(i + 1);
-		
-		
-	}
-	for (uint i = 2; i < point_n; i++) {
-		
 	}
 
 	// generation of vertex buffer: use vertices as it is

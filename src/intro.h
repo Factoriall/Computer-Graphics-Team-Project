@@ -35,4 +35,6 @@ inline rect_t create_introBoard() //function to save the information about walls
 	return { vec3(30.0f, 0, 0), vec2(4.81f, 7.32f), vec3(0, 0, 0), 0 };
 }
 
+rect_t		introBoard = create_introBoard();
+
 #endif 
