@@ -19,8 +19,6 @@ irrklang::ISoundSource* sound_floor_src = nullptr;
 irrklang::ISoundSource* sound_wall_src = nullptr;
 irrklang::ISoundSource* sound_plate_src = nullptr;
 
-float d;
-
 bool	sound_init() {
 	// create engine
 	engine = irrklang::createIrrKlangDevice();

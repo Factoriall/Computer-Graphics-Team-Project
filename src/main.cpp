@@ -8,7 +8,25 @@
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
 #include "intro.h"		// intro
-#include "sound.h"		// sound
+
+
+#include "irrKlang/irrKlang.h"	// irrKlang for sound
+#pragma comment(lib, "irrKlang.lib")
+
+// constant
+static const char* colision_sound_path = "../bin/sound/colision.wav";
+static const char* colision_with_floor_sound_path = "../bin/sound/grass.wav";
+static const char* colision_with_wall_sound_path = "../bin/sound/bricks.wav";
+static const char* colision_with_plate_sound_path = "../bin/sound/iron_plate.wav";
+
+//*************************************
+// irrKlang objects
+irrklang::ISoundEngine* engine = nullptr;
+irrklang::ISoundSource* sound_src = nullptr;
+irrklang::ISoundSource* sound_floor_src = nullptr;
+irrklang::ISoundSource* sound_wall_src = nullptr;
+irrklang::ISoundSource* sound_plate_src = nullptr;
+
 
 //*************************************
 // global constants
@@ -240,13 +258,20 @@ void motion( GLFWwindow* window, double x, double y )
 
 bool user_init()
 {
-	// 사운드 설정 초기화
-	if (!sound_init()) printf("Error to initialize sound\n");
-	else {
-		// 각 음원의 볼륨 조정
-		sound_wall_src->setDefaultVolume(0.3f);
-		sound_plate_src->setDefaultVolume(0.2f);
-	}
+	// create engine
+	engine = irrklang::createIrrKlangDevice();
+	if (!engine) return false;
+
+	//add sound source from the sound file
+	// sound_src =		  engine->addSoundSourceFromFile(colision_sound_path);
+	sound_floor_src = engine->addSoundSourceFromFile(colision_with_floor_sound_path);
+	sound_wall_src = engine->addSoundSourceFromFile(colision_with_wall_sound_path);
+	sound_plate_src = engine->addSoundSourceFromFile(colision_with_plate_sound_path);
+
+	// 각 음원의 볼륨 조정
+	sound_wall_src->setDefaultVolume(0.3f);
+	sound_plate_src->setDefaultVolume(0.2f);
+	
 
 	// log hotkeys
 	print_help();
