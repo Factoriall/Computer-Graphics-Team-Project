@@ -9,6 +9,7 @@
 #include "wall.h"		// wall
 #include "intro.h"		// intro
 #include "sound.h"		// sound
+#include "physics.h"	// physics
 
 //*************************************
 // global constants

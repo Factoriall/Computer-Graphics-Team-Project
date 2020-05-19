@@ -65,6 +65,7 @@
     <ClInclude Include="intro.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="floor.h" />
+    <ClInclude Include="physics.h" />
     <ClInclude Include="plate.h" />
     <ClInclude Include="pointer.h" />
     <ClInclude Include="slime.h" />
