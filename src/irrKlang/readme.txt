@@ -1,5 +1,5 @@
 ==========================================================================
-The irrKlang SDK version 1.5
+The irrKlang SDK version 1.6
 ==========================================================================
 
   Welcome the irrKlang SDK.
@@ -23,8 +23,8 @@ The irrKlang SDK version 1.5
   came the SDK. These are:
   
   \bin         The compiled library irrKlang.DLL and some compiled demo 
-               and example applications, just start them to see the 
-               Irrlicht Engine in action.
+               and example applications, just start them to see 
+               irrKlang in action.
   \doc         Documentation of the Irrlicht Engine.
   \examples    Examples and tutorials showing how to use the native engine
                engine using C++.
@@ -83,11 +83,6 @@ There are four versions of irrKlang.NET available. They have the same
 functionality and can be used from the same .NET projects.
 The difference are only their dependencies and target platforms:
 
-irrKlang.NET in bin\dotnet-1.1:
-      Compiled for .NET common language runtime version 1.1, depends on
-      the modudle MSVCR71.DLL
-      Works with all .NET versions (32 bit).
-
 irrKlang.NET2.0 in bin\dotnet-2.0:
       Compiled for .NET common language runtime version 2.0, depends on
       the modudles MSVCR80.DLL and MSVCM80.DLL. (32 bit)
@@ -95,15 +90,15 @@ irrKlang.NET2.0 in bin\dotnet-2.0:
 	  redistributeable (vcredist_x86)
 	  
 irrKlang.NET4 in bin\dotnet-4:
-      Compiled for .NET common language runtime version 4, depends on
-      MSVCR100.DLL. (32 bit)
-	  One method to redistribute this is using the visual studio 2010
+      Compiled for .NET common language runtime version 4.5, depends on
+      VCRUNTIME140.dll. (32 bit)
+	  One method to redistribute this is using the visual studio 2017
 	  redistributeable (vcredist_x86)
       
 irrKlang.NET4 in bin\dotnet-4-64: (only in the 64 bit irrKlang SDK)
 	  64 bit version, Compiled for .NET common language runtime version 4.5,
-	  depends on MSVCR120.DLL. (64 bit)
-	  One method to redistribute this is using the visual studio 2013
+	  depends on VCRUNTIME140.dll. (64 bit)
+	  One method to redistribute this is using the visual studio 2017
 	  redistributeable (vcredist 64 bit)
 	
 ==========================================================================
@@ -111,7 +106,7 @@ irrKlang.NET4 in bin\dotnet-4-64: (only in the 64 bit irrKlang SDK)
 ==========================================================================
 
 irrKlang's source codes, documentation and binaries contained within the 
-distributed archive are copyright © Nikolaus Gebhardt / Ambiera 2001-2014.
+distributed archive are copyright © Nikolaus Gebhardt / Ambiera 2001-2018.
 
 The contents of the irrKlang distribution archive may not be redistributed, 
 reproduced, modified, transmitted, broadcast, published or adapted in any 
