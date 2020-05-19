@@ -8,25 +8,7 @@
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
 #include "intro.h"		// intro
-
-
-#include "irrKlang/irrKlang.h"	// irrKlang for sound
-#pragma comment(lib, "irrKlang.lib")
-
-// constant
-static const char* colision_sound_path = "../bin/sound/colision.wav";
-static const char* colision_with_floor_sound_path = "../bin/sound/grass.wav";
-static const char* colision_with_wall_sound_path = "../bin/sound/bricks.wav";
-static const char* colision_with_plate_sound_path = "../bin/sound/iron_plate.wav";
-
-//*************************************
-// irrKlang objects
-irrklang::ISoundEngine* engine = nullptr;
-irrklang::ISoundSource* sound_src = nullptr;
-irrklang::ISoundSource* sound_floor_src = nullptr;
-irrklang::ISoundSource* sound_wall_src = nullptr;
-irrklang::ISoundSource* sound_plate_src = nullptr;
-
+#include "sound.h"		// sound
 
 //*************************************
 // global constants
@@ -52,6 +34,7 @@ bool		is_debug_mode = false;
 int			collision_type = 0;
 float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
+bool		sound_on = false;
 
 //*************************************
 void update()
@@ -66,7 +49,7 @@ void update()
 	t = float(glfwGetTime());
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if ((collision_type = sphere.collision(floors, walls, plates)) && sphere.is_moving) {
+	if ((collision_type = sphere.collision(floors, walls, plates)) && sound_on && sphere.is_moving) {
 		if (collision_type == 1) {
 			// collide with sample
 			engine->play2D(sound_src, false);
@@ -258,19 +241,13 @@ void motion( GLFWwindow* window, double x, double y )
 
 bool user_init()
 {
-	// create engine
-	engine = irrklang::createIrrKlangDevice();
-	if (!engine) return false;
-
-	//add sound source from the sound file
-	// sound_src =		  engine->addSoundSourceFromFile(colision_sound_path);
-	sound_floor_src = engine->addSoundSourceFromFile(colision_with_floor_sound_path);
-	sound_wall_src = engine->addSoundSourceFromFile(colision_with_wall_sound_path);
-	sound_plate_src = engine->addSoundSourceFromFile(colision_with_plate_sound_path);
-
-	// 각 음원의 볼륨 조정
-	sound_wall_src->setDefaultVolume(0.3f);
-	sound_plate_src->setDefaultVolume(0.2f);
+	
+	if (sound_on && sound_init()) {
+		// 각 음원의 볼륨 조정
+		sound_wall_src->setDefaultVolume(0.3f);
+		sound_plate_src->setDefaultVolume(0.2f);
+	}
+	
 	
 
 	// log hotkeys
@@ -308,8 +285,7 @@ bool user_init()
 
 void user_finalize()
 {
-	// close the engine
-	engine->drop();
+	if(sound_on) engine->drop();
 }
 
 int main( int argc, char* argv[] )
