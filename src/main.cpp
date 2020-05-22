@@ -86,8 +86,6 @@ void render()
 	// clear screen (with background color) and clear depth buffer
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-	
-
 	render_wall(program, walls);
 	render_floor(program, floors);
 	render_plate(program, plates);
@@ -263,16 +261,15 @@ bool user_init()
 	print_help();
 
 	// init GL states
-	glClearColor( 39/255.0f, 40/255.0f, 34/255.0f, 1.0f );	// set clear color
+	glClearColor(39/255.0f, 40/255.0f, 34/255.0f, 1.0f);	// set clear color
 	glEnable(GL_BLEND);
-	glEnable( GL_CULL_FACE );								// turn on backface culling
-	glEnable( GL_DEPTH_TEST );								// turn on depth tests
+	glEnable(GL_CULL_FACE);								// turn on backface culling
+	glEnable(GL_DEPTH_TEST);								// turn on depth tests
 	glEnable(GL_TEXTURE_2D);								// enable texturing
 	glActiveTexture(GL_TEXTURE0);							// notify GL the current texture slot is 0
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// setup freetype
-	if (!init_text()) return false;
+	
 
 	// load the objects we need in our project
 	std::vector<vertex> unit_rect_vertices = create_rect_vertices();
@@ -289,6 +286,9 @@ bool user_init()
 	FloorTexture = create_texture(floor_image_path, true);
 	IntroTexture = create_texture(intro_image_path, true);
 	PointerTexture = create_texture(pointer_image_path, true);
+
+	// setup freetype
+	if (!init_text()) return false;
 
 	cam_intro.eye = vec3(30.0f, 3.75f, 9.3f);
 	cam_intro.at = vec3(30.0f, 3.75f, 0);
