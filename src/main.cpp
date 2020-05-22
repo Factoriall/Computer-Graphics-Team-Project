@@ -10,6 +10,7 @@
 #include "intro.h"		// intro
 #include "sound.h"		// sound
 #include "physics.h"	// physics
+#include "text.h"		// text
 
 //*************************************
 // global constants
@@ -30,7 +31,8 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 //*************************************
 // global variables
 int			frame = 0;		// index of rendering frames
-float		t = 0.0f;
+float		t = 0.0f;		// glfwGetTime()
+float		a = 0.0f;		// 블링크 텍스트 용
 bool		is_debug_mode = false;
 int			collision_type = 0;
 float		debug_move_speed = 0.06f;
@@ -46,8 +48,9 @@ void update()
 	cam_now->aspect_ratio = window_size.x/float(window_size.y);
 	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar );
 	
-	// 시간 비례 업데이트 구현할 것
+	// 시간 비례 애니메이션 구현용 변수
 	t = float(glfwGetTime());
+	a = abs(sin(float(glfwGetTime()) * 2.5f));
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
 	if ((collision_type = sphere.collision(floors, walls, plates)) && sound_on && sphere.is_moving) {
@@ -82,9 +85,8 @@ void render()
 {
 	// clear screen (with background color) and clear depth buffer
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
 	
-	// notify GL that we use our own program
-	glUseProgram( program );
 
 	render_wall(program, walls);
 	render_floor(program, floors);
@@ -92,8 +94,16 @@ void render()
 	render_sphere(program, sphere, t);
 	render_introBoard(program, introBoard);
 	if(!sphere.is_moving) render_pointer(program, pointer);
-	// pointer.angle += 0.02f;
-
+	
+	// render texts
+	float dpi_scale = cg_get_dpi_scale();
+	render_text(std::to_string(t), 100, 100, 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
+	render_text("I love Computer Graphics!", 100, 125, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
+	render_text("Blinking text here", 100, 155, 0.6f, vec4(0.5f, 0.7f, 0.7f, a), dpi_scale);
+	
+	// notify GL that we use our own program
+	glUseProgram(program);
+	
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
 }
@@ -249,17 +259,20 @@ bool user_init()
 		sound_plate_src->setDefaultVolume(0.2f);
 	}
 	
-	
-
 	// log hotkeys
 	print_help();
 
 	// init GL states
 	glClearColor( 39/255.0f, 40/255.0f, 34/255.0f, 1.0f );	// set clear color
+	glEnable(GL_BLEND);
 	glEnable( GL_CULL_FACE );								// turn on backface culling
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
 	glEnable(GL_TEXTURE_2D);								// enable texturing
 	glActiveTexture(GL_TEXTURE0);							// notify GL the current texture slot is 0
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// setup freetype
+	if (!init_text()) return false;
 
 	// load the objects we need in our project
 	std::vector<vertex> unit_rect_vertices = create_rect_vertices();

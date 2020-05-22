@@ -71,12 +71,16 @@
     <ClInclude Include="slime.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="stb_truetype.h" />
+    <ClInclude Include="text.h" />
     <ClInclude Include="trackball.h" />
     <ClInclude Include="wall.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\teamproject.frag" />
     <None Include="..\bin\shaders\teamproject.vert" />
+    <None Include="..\bin\shaders\text.frag" />
+    <None Include="..\bin\shaders\text.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

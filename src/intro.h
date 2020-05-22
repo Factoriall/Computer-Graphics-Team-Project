@@ -13,7 +13,6 @@ GLuint	IntroTexture = 0;
 void render_introBoard(GLuint program, rect_t& introBoard) {
 	glBindVertexArray(rect_vertex_array);
 
-
 	if (IntroTexture != 0) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, IntroTexture);
