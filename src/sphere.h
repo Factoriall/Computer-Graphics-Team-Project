@@ -29,10 +29,8 @@ struct jp_t {//jump 게이지 표현
 
 // implement fuctions
 void sphere_t::update(float t) {
-	float passed_time = (t - last_t) * game_speed;
-	printf("passed_time : %f \n", passed_time);
-	center = center + vec3(x_speed, y_speed, 0) * passed_time;
-	angle =  angle + angle_speed * passed_time;
+	
+	angle += angle_speed;
 	angle_speed *= 0.99f;
 	
 	last_t = t;

@@ -4,9 +4,9 @@
 #define __PHYSICS_H__
 #include "object.h"
 
-const float gravity = 0.98f;						// gravity
-const float e_x = 0.87f;							// elasticity_x  x 방향 마찰계수
-const float e_y = 0.87f;							// elasticity_y  y 방향 마찰계수
+const float gravity = 0.00198f;						// gravity
+const float e_x = 0.47f;							// elasticity_x  x 방향 마찰계수
+const float e_y = 0.47f;							// elasticity_y  y 방향 마찰계수
 float		angle_const = 4.3f;
 
 // collide fuction
@@ -68,6 +68,8 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	int		is_collide = 0;
 	vec3	save_pos_sphere = center;
 	
+	y_speed -= gravity;
+
 	if (floor_collide(center.y, floor_y, radius))	//바닥과 충돌 시
 	{
 		y_speed *= -e_y;
@@ -150,11 +152,12 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		}
 	}
 
-	y_speed -= accel * gravity;
+	
+	center += vec3(x_speed, y_speed, 0);
 
 	if ((save_pos_sphere - center).length2() < 0.0002f) {
 		if (stop_flag) {
-			if (t - paused_time > 1.1f) {
+			if (t - paused_time > 0.5f) {
 				is_moving = false;
 			}
 		}
@@ -168,14 +171,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		is_moving = true;
 		stop_flag = false;
 	}
-	/*
-	if (abs(x_speed) < 0.001f && abs(y_speed) < 0.001f && is_collide) {
-		is_moving = false;
-	}
-	else {
-		is_moving = true;
-	}
-	*/
+
 	return is_collide;
 }
 

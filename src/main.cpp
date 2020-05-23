@@ -1,3 +1,4 @@
+#include "settings.h"	// 전역 상수
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
 #include "camera.h"		// camera header file
@@ -35,26 +36,37 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 // global variables
 int			frame = 0;		// index of rendering frames
 float		t = 0.0f;		// glfwGetTime()
-float		a = 0.0f;		// 블링크 텍스트 용
 bool		is_debug_mode = false;
 int			collision_type = 0;
 float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
-bool		sound_on = false;
+bool		sound_on = true;
 int			number_of_jump = 0;
+int			fps = 0;
+float		fps_count_time = 0.0f;
+
+void update_fps() {
+	if (t - fps_count_time > 1.0f) {
+		fps_count_time += 1.0f;
+		fps = frame;
+		frame = 0;
+	}
+}
+void update_camera() {
+	cam_for_play.update(sphere.center);
+
+	// update projection matrix
+	cam_now->aspect_ratio = window_size.x / float(window_size.y);
+	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar);
+}
 
 //*************************************
 void update()
 {
-	cam_for_play.update(sphere.center);
-
-	// update projection matrix
-	cam_now->aspect_ratio = window_size.x/float(window_size.y);
-	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar );
+	t = float(glfwGetTime());  // now time
+	update_fps();
+	update_camera();
 	
-	// 시간 비례 애니메이션 구현용 변수
-	t = float(glfwGetTime());
-	a = abs(sin(float(glfwGetTime()) * 2.5f));
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
 	if ((collision_type = sphere.collision(floors, walls, plates, t)) && sound_on && sphere.is_moving) {
@@ -104,8 +116,9 @@ void render()
 	// render texts
 	float dpi_scale = cg_get_dpi_scale();
 	render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	render_text((std::string(str_play_time) + std::to_string(t).substr(0, 4).c_str()), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	render_text((std::string(str_play_time) + std::to_string(t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	
 	// notify GL that we use our own program
 	glUseProgram(program);

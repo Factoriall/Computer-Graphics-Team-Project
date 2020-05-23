@@ -68,7 +68,7 @@
     <ClInclude Include="physics.h" />
     <ClInclude Include="plate.h" />
     <ClInclude Include="pointer.h" />
-    <ClInclude Include="slime.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="stb_truetype.h" />
