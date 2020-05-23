@@ -18,20 +18,23 @@ struct pointer_t {
 };
 
 // render function
-void render_pointer(GLuint program, pointer_t & pointer) {
+void render_pointer(GLuint program, pointer_t & pointer, float gauge) {
 	glBindVertexArray(pointer_vertex_array);
 
-	if (PointerTexture != 0) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, PointerTexture);
-		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
-	}
+	GLint uloc;
+
+	gauge /= PI/4;
+	vec4 point_color = vec4(sin(gauge), 0.1f, cos(gauge), 1.0f);
+	uloc = glGetUniformLocation(program, "b_solid_color");	if (uloc > -1) glUniform1i(uloc, 1);
+	uloc = glGetUniformLocation(program, "solid_color");		if (uloc > -1) glUniform4fv(uloc, 1, point_color);	// pointer version
 
 	mat4 model_matrix = mat4::translate(pointer.center) *
 		mat4::rotate(vec3(0, 0, 1), pointer.angle) *
 		mat4::scale(pointer.scale);
 	glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, model_matrix);
 	glDrawElements(GL_TRIANGLES, 35*2*3, GL_UNSIGNED_INT, nullptr);
+
+	uloc = glGetUniformLocation(program, "b_solid_color");	if (uloc > -1) glUniform1i(uloc, 0);
 }
 
 // implement

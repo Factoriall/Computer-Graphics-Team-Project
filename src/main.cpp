@@ -17,6 +17,8 @@
 static const char*	window_name = "Team Project - Funny Game!";
 static const char*	vert_shader_path = "../bin/shaders/teamproject.vert";
 static const char*  frag_shader_path = "../bin/shaders/teamproject.frag";
+static const char*	str_play_time		 = "Play Time  : ";
+static const char*	str_number_of_jump   = "Jump Count : ";
 
 //*************************************
 // window objects
@@ -38,6 +40,9 @@ int			collision_type = 0;
 float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
 bool		sound_on = false;
+int			number_of_jump = 0;
+bool		b_solid_color = false;
+// bool		play_ready = false;
 
 //*************************************
 void update()
@@ -53,7 +58,7 @@ void update()
 	a = abs(sin(float(glfwGetTime()) * 2.5f));
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if ((collision_type = sphere.collision(floors, walls, plates)) && sound_on && sphere.is_moving) {
+	if ((collision_type = sphere.collision(floors, walls, plates, t)) && sound_on && sphere.is_moving) {
 		if (collision_type == 1) {
 			// collide with sample
 			engine->play2D(sound_src, false);
@@ -91,13 +96,15 @@ void render()
 	render_plate(program, plates);
 	render_sphere(program, sphere, t);
 	render_introBoard(program, introBoard);
-	if(!sphere.is_moving) render_pointer(program, pointer);
+	if (!sphere.is_moving) {
+		render_pointer(program, pointer, jp.get_gauge(t));
+	}
 	
 	// render texts
 	float dpi_scale = cg_get_dpi_scale();
-	render_text(std::to_string(t), 100, 100, 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
-	render_text("I love Computer Graphics!", 100, 125, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
-	render_text("Blinking text here", 100, 155, 0.6f, vec4(0.5f, 0.7f, 0.7f, a), dpi_scale);
+	render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	render_text((std::string(str_play_time) + std::to_string(t).substr(0, 4).c_str()), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	
 	// notify GL that we use our own program
 	glUseProgram(program);
@@ -145,9 +152,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			printf(" > show intro\n");
 			cam_now = &cam_intro;
 		}
-		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) {//jump charge start
-			if(abs(sphere.x_speed) < 0.0001f && abs(sphere.y_speed) < 0.0001f)//이중점프 방지
-				jp.startTime = float(glfwGetTime());
+		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) { // jump charge start
+			jp.startTime = float(glfwGetTime());
+			jp.jump = true;
 		}
 		else if (is_debug_mode || true) {
 			// debug mode only input
@@ -170,11 +177,13 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			}
 		}
 	}
-	else if (action == GLFW_RELEASE)//jump charge finish
+	else if (action == GLFW_RELEASE) // jump charge finish
 	{
-		if (key == GLFW_KEY_SPACE && abs(sphere.x_speed) < 0.0001f && abs(sphere.y_speed) < 0.0001f){//이중점프 방지
+		if (key == GLFW_KEY_SPACE && jp.jump){//이중점프 방지
 			jp.endTime = float(glfwGetTime());
-			jp.jump = true;
+			jp.jump = false;
+			jp.jump_action(sphere);
+			number_of_jump++;
 		}
 	}
 }

@@ -12,10 +12,12 @@ in vec2 tc;
 // the only output variable
 out vec4 fragColor;
 
+uniform bool b_solid_color;
+uniform vec4 solid_color;
 uniform sampler2D	TEX;
 
 void main()
 {
-		fragColor = texture(TEX, tc);
+		fragColor = b_solid_color ? solid_color : texture(TEX, tc);
 
 }

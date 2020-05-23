@@ -10,17 +10,19 @@ static const char* sphere_image_path = "../bin/images/earth.png";
 GLuint	SphereTexture = 0;
 
 // global variables
-
+float	power = 0.2f;
 bool	stop_simulation = false;
 float	paused_time = 0.0f;
 float	gauge = 0.0f;
 float	angle = 0.0f;
 
-struct {//jump 게이지 표현
+struct jp_t {//jump 게이지 표현
 	bool jump = false;
 	float startTime = 0.0f;
 	float endTime = 0.0f;
 	operator bool() const { return jump; }
+	void jump_action(sphere_t& sp);
+	float get_gauge(float t);
 } jp; // flags of keys for smooth changes
 
 // implement fuctions
@@ -29,6 +31,22 @@ void sphere_t::update(float t) {
 		mat4::rotate(vec3(1, 0, 0), angle.y) *
 		mat4::rotate(vec3(0, 1, 0), angle.x) *
 		mat4::scale(radius);
+}
+void jp_t::jump_action(sphere_t& sp) {
+	gauge = min(endTime - startTime, 2.0f) * power;
+	angle = pointer.angle + PI / 4.0f;//각도 조정
+
+	sp.x_speed = gauge * cos(angle);
+	sp.y_speed = gauge * sin(angle);
+};
+float jp_t::get_gauge(float t) {
+	if (jump) {
+		return gauge = min(t - startTime, 2.0f);
+	}
+	else {
+		return 0;
+	}
+	
 }
 
 // render function
@@ -41,14 +59,6 @@ void render_sphere(GLuint program, sphere_t & sphere, float t) {
 		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
 	}
 
-	if (jp.jump) {//jump 상태일 시 게이지 반영해서 sphere에 x 및 y speed 적용, 이후 false로 돌려놓음
-		gauge = min(jp.endTime - jp.startTime, 1.0f) * 0.12f;
-		angle = pointer.angle + PI / 4.0f;//각도 조정
-	
-		sphere.x_speed = gauge * cos(angle);
-		sphere.y_speed = gauge * sin(angle);
-		jp.jump = false;
-	}
 	sphere.update(t);
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "model_matrix"), 1, GL_TRUE, sphere.model_matrix);
