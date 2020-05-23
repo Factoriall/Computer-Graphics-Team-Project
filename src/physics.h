@@ -8,6 +8,7 @@ const float gravity = 0.00198f;						// gravity
 const float e_x = 0.47f;							// elasticity_x  x 방향 마찰계수
 const float e_y = 0.47f;							// elasticity_y  y 방향 마찰계수
 float		angle_const = 4.3f;
+float		last_t;
 
 // collide fuction
 bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 충돌 감지
@@ -66,8 +67,9 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 {
 	float	floor_y = floors[0].center.y;	//y값
 	int		is_collide = 0;
-	vec3	save_pos_sphere = center;
-	
+	vec3	p0 = center;
+	float	del_t = t - last_t;
+
 	y_speed -= gravity;
 
 	if (floor_collide(center.y, floor_y, radius))	//바닥과 충돌 시
@@ -152,10 +154,10 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		}
 	}
 
-	
-	center += vec3(x_speed, y_speed, 0);
-
-	if ((save_pos_sphere - center).length2() < 0.0002f) {
+	center += vec3(x_speed, y_speed, 0) * del_t * 100.0f;
+	last_t = t;
+	 
+	if ((p0 - center).length2() < 0.0002f) {
 		if (stop_flag) {
 			if (t - paused_time > 0.5f) {
 				is_moving = false;
