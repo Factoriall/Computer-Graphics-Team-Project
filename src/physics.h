@@ -63,7 +63,7 @@ bool	plate_collide_4(float pl_x, float pl_y, float plsize_x, float plsize_y, flo
 }
 
 // 실시간 구 좌표 값 변경 && 구 충돌 구현
-int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates, float t, int fps)
+int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates, float t)
 {
 	float	floor_y = floors[0].center.y;	//y값
 	int		is_collide = 0;
@@ -167,7 +167,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		jp.jump_once = false;
 	}
 
-	center += vec3(x_speed, y_speed, 0) * del_t * float(fps);
+	center += vec3(x_speed, y_speed, 0) * del_t * 100.0f;
 	last_t = t;
 	 
 	if ((p0 - center).length2() < 0.0002f) {

@@ -42,7 +42,7 @@ float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
 bool		sound_on = true;
 int			number_of_jump = 0;
-int			fps = 100;
+int			fps = 0;
 float		fps_count_time = 0.0f;
 
 void update_fps() {
@@ -69,7 +69,7 @@ void update()
 	
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if ((collision_type = sphere.collision(floors, walls, plates, t, fps)) && sound_on && sphere.is_moving) {
+	if ((collision_type = sphere.collision(floors, walls, plates, t)) && sound_on && sphere.is_moving) {
 		if (collision_type == 1) {
 			// collide with sample
 			engine->play2D(sound_src, false);
