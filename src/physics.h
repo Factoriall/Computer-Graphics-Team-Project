@@ -7,8 +7,6 @@
 const float gravity = 0.98f;						// gravity
 const float e_x = 0.87f;							// elasticity_x  x 방향 마찰계수
 const float e_y = 0.87f;							// elasticity_y  y 방향 마찰계수
-float		last_t = 0.0f;						// 시간경과 측정을 위한 저장용 변수
-float		game_speed = 100.0f;				// 애니메이션의 속도
 float		angle_const = 4.3f;
 
 // collide fuction
@@ -69,12 +67,11 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	float	floor_y = floors[0].center.y;	//y값
 	int		is_collide = 0;
 	vec3	save_pos_sphere = center;
-	float	passed_time = min((t - last_t) * game_speed, 1.0f); // 게임의 실행 속도가 빠르면 passed_time 값이 작아짐
 	
 	if (floor_collide(center.y, floor_y, radius))	//바닥과 충돌 시
 	{
-		y_speed *= -e_y * passed_time;
-		x_speed *= e_x * passed_time;
+		y_speed *= -e_y;
+		x_speed *= e_x;
 		angle_speed = -x_speed*angle_const;
 		
 		center.y = floor_y + radius;	//부르르방지
@@ -83,7 +80,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 
 	if (wall_collide(center.x, walls[1].center.x, radius))	//벽1과 충돌 시
 	{
-		x_speed *= -e_x * passed_time;
+		x_speed *= -e_x;
 		if (center.x > walls[1].center.x)
 		{
 			center.x = walls[1].center.x + radius;
@@ -97,7 +94,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 
 	if (wall_collide(center.x, walls[2].center.x, radius))	//벽2과 충돌 시
 	{
-		x_speed *= -e_x * passed_time;
+		x_speed *= -e_x;
 		if (center.x > walls[2].center.x)
 		{
 			center.x = walls[2].center.x + radius;
@@ -123,41 +120,38 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		}
 		if (plate_collide_1(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[1]와 충돌
 		{
-			x_speed *= -e_x * passed_time;
+			x_speed *= -e_x;
 			center.x = pl_x - plsize_x - radius;
 			angle_speed = -y_speed * angle_const;
 			is_collide = 4;
 		}
 		if (plate_collide_2(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[2]와 충돌
 		{
-			y_speed *= -e_y * passed_time;
-			x_speed *= e_x * passed_time;
+			y_speed *= -e_y;
+			x_speed *= e_x;
 			center.y = pl_y - plsize_y - radius;
 			angle_speed = -x_speed * angle_const;
 			is_collide = 4;
 		}
 		if (plate_collide_3(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[3]와 충돌
 		{
-			x_speed *= -e_x * passed_time;
+			x_speed *= -e_x;
 			center.x = pl_x + plsize_x + radius;
 			angle_speed = -y_speed * angle_const;
 			is_collide = 4;
 		}
 		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[4]와 충돌
 		{
-			y_speed *= -e_y * passed_time;
-			x_speed *= e_x * passed_time;
+			y_speed *= -e_y;
+			x_speed *= e_x;
 			center.y = pl_y + plsize_y + radius;
 			angle_speed = -x_speed * angle_const;
 			is_collide = 4;
 		}
 	}
 
-	y_speed -= accel * gravity * passed_time;
-	center += vec3(x_speed, y_speed, 0);
+	y_speed -= accel * gravity;
 
-
-	last_t = t;
 	if ((save_pos_sphere - center).length2() < 0.0002f) {
 		if (stop_flag) {
 			if (t - paused_time > 1.1f) {
