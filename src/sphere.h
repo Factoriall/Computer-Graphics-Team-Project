@@ -15,6 +15,8 @@ bool	stop_simulation = false;
 float	paused_time = 0.0f;
 float	gauge = 0.0f;
 float	angle = 0.0f;
+float	last_t = 0.0f;
+float	game_speed = 100.0f;
 
 struct jp_t {//jump 게이지 표현
 	bool jump = false;
@@ -27,9 +29,13 @@ struct jp_t {//jump 게이지 표현
 
 // implement fuctions
 void sphere_t::update(float t) {
-	angle += angle_speed;
-	angle_speed *= 0.997f;
+	float passed_time = (t - last_t) * game_speed;
+	printf("passed_time : %f \n", passed_time);
+	center = center + vec3(x_speed, y_speed, 0) * passed_time;
+	angle =  angle + angle_speed * passed_time;
+	angle_speed *= 0.99f;
 	
+	last_t = t;
 	model_matrix = mat4::translate(center) *
 		mat4::rotate(vec3(0, 0, 1), angle) *
 		mat4::scale(radius);
