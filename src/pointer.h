@@ -25,7 +25,7 @@ void render_pointer(GLuint program, pointer_t & pointer, float gauge) {
 
 	gauge /= PI/4;
 	vec4 point_color = vec4(sin(gauge), 0.1f, cos(gauge), 1.0f);
-	uloc = glGetUniformLocation(program, "b_solid_color");	if (uloc > -1) glUniform1i(uloc, 1);
+	uloc = glGetUniformLocation(program, "b_solid_color");		if (uloc > -1) glUniform1i(uloc, 1);
 	uloc = glGetUniformLocation(program, "solid_color");		if (uloc > -1) glUniform4fv(uloc, 1, point_color);	// pointer version
 
 	mat4 model_matrix = mat4::translate(pointer.center) *

@@ -38,6 +38,7 @@ void jp_t::jump_action(sphere_t& sp) {
 	gauge = min(endTime - startTime, 2.0f) * power;
 	angle = pointer.angle + PI / 4.0f;//각도 조정
 
+	printf("gauge: %f\n", gauge);
 	sp.x_speed = gauge * cos(angle);
 	sp.y_speed = gauge * sin(angle);
 };

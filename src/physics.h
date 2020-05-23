@@ -69,7 +69,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	float	floor_y = floors[0].center.y;	//y값
 	int		is_collide = 0;
 	vec3	save_pos_sphere = center;
-	float	passed_time = min((t - last_t) * game_speed, 1.0f);
+	float	passed_time = min((t - last_t) * game_speed, 1.0f); // 게임의 실행 속도가 빠르면 passed_time 값이 작아짐
 	
 	if (floor_collide(center.y, floor_y, radius))	//바닥과 충돌 시
 	{
