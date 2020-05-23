@@ -11,6 +11,7 @@
 #include "sound.h"		// sound
 #include "physics.h"	// physics
 #include "text.h"		// text
+#include "storm.h"		// 히오스 배너
 
 //*************************************
 // global constants
@@ -41,8 +42,6 @@ float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
 bool		sound_on = false;
 int			number_of_jump = 0;
-bool		b_solid_color = false;
-// bool		play_ready = false;
 
 //*************************************
 void update()
@@ -95,10 +94,12 @@ void render()
 	render_floor(program, floors);
 	render_plate(program, plates);
 	render_sphere(program, sphere, t);
+	render_storm(program, storm);
 	render_introBoard(program, introBoard);
 	if (!sphere.is_moving) {
 		render_pointer(program, pointer, jp.get_gauge(t));
 	}
+	
 	
 	// render texts
 	float dpi_scale = cg_get_dpi_scale();
@@ -287,6 +288,8 @@ bool user_init()
 	update_sphere_vertex_buffer(unit_sphere_vertices);
 	std::vector<vertex> unit_pointer_vertices = create_pointer_vertices();
 	update_pointer_vertex_buffer(unit_pointer_vertices);
+	std::vector<vertex> unit_circle_vertices = create_circle_vertices();
+	update_circle_vertex_buffer(unit_circle_vertices);
 
 	// assign texture to each components.
 	PlateTexture = create_texture(plate_image_path, true);
@@ -295,6 +298,7 @@ bool user_init()
 	FloorTexture = create_texture(floor_image_path, true);
 	IntroTexture = create_texture(intro_image_path, true);
 	PointerTexture = create_texture(pointer_image_path, true);
+	StormTexture = create_texture(storm_image_path, true);
 
 	// setup freetype
 	if (!init_text()) return false;

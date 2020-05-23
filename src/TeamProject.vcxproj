@@ -72,6 +72,7 @@
     <ClInclude Include="sound.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="stb_truetype.h" />
+    <ClInclude Include="storm.h" />
     <ClInclude Include="text.h" />
     <ClInclude Include="trackball.h" />
     <ClInclude Include="wall.h" />

@@ -15,6 +15,7 @@ const uint	M = 72 / 2;							// latitute
 GLuint	rect_vertex_array = 0;					// ID holder for vertex array 
 GLuint	sphere_vertex_array = 0;				// ID holder for vertex array object
 GLuint	pointer_vertex_array = 0;				// ID holder for vertex array object
+GLuint	circle_vertex_array = 0;				// ID holder for vertex array object
 
 // global variables
 bool	b_index_buffer = true;					// index_buffering mode
@@ -25,6 +26,11 @@ struct rect_t {
 	vec2	scale = vec2(0);
 	vec3	axle = vec3(0);
 	float	angle = 0;
+};
+struct circle_t {
+	vec3	center = vec3(0);
+	float	scale = 1.0f;
+	float	angle = 0.0f;
 };
 struct plate_t {
 	vec3 center = vec3(0);						// position of center ( x, y, z )
@@ -98,6 +104,16 @@ std::vector<vertex> create_pointer_vertices()
 		v.push_back({ vec3(s,c,0), vec3(0,0,-1.0f), vec2(s,c) * 0.5f + 0.5f });
 	}
 	v.push_back({ vec3(2.0f, 2.0f, 0), vec3(0,0,-1.0f), vec2(0.5f) });
+	return v;
+}
+std::vector<vertex> create_circle_vertices()
+{
+	std::vector<vertex> v = { { vec3(0), vec3(0,0,-1.0f), vec2(0.5f) } }; // origin
+	for (uint i = 0; i <= N; i++)
+	{
+		float t = 2 * PI * i / float(N), c = cos(t), s = sin(t);
+		v.push_back({ vec3(s,c,0), vec3(0,0,-1.0f), vec2(s,c) * 0.5f + 0.5f });
+	}
 	return v;
 }
 
@@ -279,6 +295,48 @@ void update_pointer_vertex_buffer(const std::vector<vertex>& vertices) // functi
 	if (pointer_vertex_array) glDeleteVertexArrays(1, &pointer_vertex_array);
 	pointer_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
 	if (!pointer_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+}
+void update_circle_vertex_buffer(const std::vector<vertex>& vertices) // function to update the wall_vertex_buffer
+{
+	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
+	static GLuint index_buffer = 0;		// ID holder for index buffer
+
+	// clear and create new buffers
+	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
+	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
+
+	// check exceptions
+	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
+
+	// create buffers
+	std::vector<uint> indices;
+
+	for (uint i = 1; i <= N+1; i++) {
+		indices.push_back(0);
+		indices.push_back(i);
+		indices.push_back(i+1);
+
+		indices.push_back(0);
+		indices.push_back(i+1);
+		indices.push_back(i);
+	}
+
+	// generation of vertex buffer: use vertices as it is
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// geneation of index buffer
+	//GL_ELEMENT_ARRAY_BUFFER == INDEX_BUFFER
+	glGenBuffers(1, &index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+
+	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
+	if (circle_vertex_array) glDeleteVertexArrays(1, &circle_vertex_array);
+	circle_vertex_array = cg_create_vertex_array(vertex_buffer, index_buffer);
+	if (!circle_vertex_array) { printf("%s(): failed to create vertex aray\n", __func__); return; }
 }
 
 // render function
