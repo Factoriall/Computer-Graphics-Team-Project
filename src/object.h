@@ -39,7 +39,8 @@ struct sphere_t {
 	vec3	center = vec3(0);
 	float	radius = 0.0f;
 
-	vec2	angle = vec2(0);
+	float	angle = 0.0f;				// z Ãà È¸Àü
+	float	angle_speed = 0.0f;
 	vec4	color = vec4(0.7f, 0.7f, 0.7f, 1.0f);
 	mat4	model_matrix;
 

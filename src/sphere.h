@@ -27,9 +27,11 @@ struct jp_t {//jump 게이지 표현
 
 // implement fuctions
 void sphere_t::update(float t) {
+	angle += angle_speed;
+	angle_speed *= 0.997f;
+	
 	model_matrix = mat4::translate(center) *
-		mat4::rotate(vec3(1, 0, 0), angle.y) *
-		mat4::rotate(vec3(0, 1, 0), angle.x) *
+		mat4::rotate(vec3(0, 0, 1), angle) *
 		mat4::scale(radius);
 }
 void jp_t::jump_action(sphere_t& sp) {
@@ -68,7 +70,7 @@ void render_sphere(GLuint program, sphere_t & sphere, float t) {
 
 // creating object functions
 inline sphere_t create_sphere() {
-	return { vec3(0.0f, 1.0f, 1.0f), 0.3f, vec2(0, 0) };
+	return { vec3(0.0f, 1.0f, 1.0f), 0.3f, 0};
 }
 
 sphere_t	sphere = create_sphere();

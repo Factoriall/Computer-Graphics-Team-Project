@@ -9,6 +9,7 @@ const float e_x = 0.87f;							// elasticity_x  x 방향 마찰계수
 const float e_y = 0.87f;							// elasticity_y  y 방향 마찰계수
 float		last_t = 0.0f;						// 시간경과 측정을 위한 저장용 변수
 float		game_speed = 100.0f;				// 애니메이션의 속도
+float		angle_const = 4.3f;
 
 // collide fuction
 bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 충돌 감지
@@ -68,13 +69,14 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	float	floor_y = floors[0].center.y;	//y값
 	int		is_collide = 0;
 	vec3	save_pos_sphere = center;
-	float	passed_time = (t - last_t) * game_speed;
-
+	float	passed_time = min((t - last_t) * game_speed, 1.0f);
 	
 	if (floor_collide(center.y, floor_y, radius))	//바닥과 충돌 시
 	{
 		y_speed *= -e_y * passed_time;
 		x_speed *= e_x * passed_time;
+		angle_speed = -x_speed*angle_const;
+		
 		center.y = floor_y + radius;	//부르르방지
 		is_collide = 2;
 	}
@@ -89,6 +91,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		else {
 			center.x = walls[1].center.x - radius;
 		}
+		angle_speed = -y_speed * angle_const;
 		is_collide = 3;
 	}
 
@@ -102,6 +105,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		else {
 			center.x = walls[2].center.x - radius;
 		}
+		angle_speed = -y_speed * angle_const;
 		is_collide = 3;
 	}
 
@@ -121,6 +125,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			x_speed *= -e_x * passed_time;
 			center.x = pl_x - plsize_x - radius;
+			angle_speed = -y_speed * angle_const;
 			is_collide = 4;
 		}
 		if (plate_collide_2(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[2]와 충돌
@@ -128,12 +133,14 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			y_speed *= -e_y * passed_time;
 			x_speed *= e_x * passed_time;
 			center.y = pl_y - plsize_y - radius;
+			angle_speed = -x_speed * angle_const;
 			is_collide = 4;
 		}
 		if (plate_collide_3(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[3]와 충돌
 		{
 			x_speed *= -e_x * passed_time;
 			center.x = pl_x + plsize_x + radius;
+			angle_speed = -y_speed * angle_const;
 			is_collide = 4;
 		}
 		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, center.x, center.y, radius))	// plate 안의 rect[4]와 충돌
@@ -141,6 +148,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			y_speed *= -e_y * passed_time;
 			x_speed *= e_x * passed_time;
 			center.y = pl_y + plsize_y + radius;
+			angle_speed = -x_speed * angle_const;
 			is_collide = 4;
 		}
 	}
