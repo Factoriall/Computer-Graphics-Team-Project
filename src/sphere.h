@@ -18,11 +18,10 @@ float	angle = 0.0f;
 float	game_speed = 100.0f;
 
 struct jp_t {//jump 게이지 표현
-	bool jumpping_now = false;
-	bool jump_once = false;
+	bool jump = false;
 	float startTime = 0.0f;
 	float endTime = 0.0f;
-	operator bool() const { return jumpping_now; }
+	operator bool() const { return jump; }
 	void jump_action(sphere_t& sp);
 	float get_gauge(float t);
 } jp; // flags of keys for smooth changes
@@ -38,10 +37,15 @@ void sphere_t::update(float t) {
 		mat4::scale(radius);
 }
 void jp_t::jump_action(sphere_t& sp) {
-	jump_once = true;
+	gauge = min(endTime - startTime, 2.0f) * power;
+	angle = pointer.angle + PI / 4.0f;//각도 조정
+
+	printf("gauge: %f\n", gauge);
+	sp.x_speed = gauge * cos(angle);
+	sp.y_speed = gauge * sin(angle);
 };
 float jp_t::get_gauge(float t) {
-	if (jumpping_now) {
+	if (jump) {
 		return gauge = min(t - startTime, 2.0f);
 	}
 	else {

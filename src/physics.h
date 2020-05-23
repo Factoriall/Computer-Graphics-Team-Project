@@ -71,7 +71,6 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	float	del_t = t - last_t;
 
 	y_speed -= gravity;
-	
 
 	if (floor_collide(center.y, floor_y, radius))	//바닥과 충돌 시
 	{
@@ -153,18 +152,6 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			angle_speed = -x_speed * angle_const;
 			is_collide = 4;
 		}
-	}
-
-
-	if (jp.jump_once) {
-		float gauge = min(jp.endTime - jp.startTime, 2.0f) * power;
-		float angle = pointer.angle + PI / 4.0f;//각도 조정
-
-
-		x_speed += gauge * cos(angle);
-		y_speed += gauge * sin(angle);
-		printf("Jump!  gauge: %f, v(x, y) = %.2f, %.2f\n", gauge, x_speed, y_speed);
-		jp.jump_once = false;
 	}
 
 	center += vec3(x_speed, y_speed, 0) * del_t * 100.0f;

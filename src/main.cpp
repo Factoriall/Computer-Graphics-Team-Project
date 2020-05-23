@@ -168,7 +168,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		}
 		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) { // jump charge start
 			jp.startTime = float(glfwGetTime());
-			jp.jumpping_now = true;
+			jp.jump = true;
 		}
 		else if (is_debug_mode || true) {
 			// debug mode only input
@@ -193,9 +193,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	}
 	else if (action == GLFW_RELEASE) // jump charge finish
 	{
-		if (key == GLFW_KEY_SPACE && jp.jumpping_now){//이중점프 방지
+		if (key == GLFW_KEY_SPACE && jp.jump){//이중점프 방지
 			jp.endTime = float(glfwGetTime());
-			jp.jumpping_now = false;
+			jp.jump = false;
 			jp.jump_action(sphere);
 			number_of_jump++;
 		}

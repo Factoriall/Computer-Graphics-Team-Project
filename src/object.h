@@ -52,6 +52,7 @@ struct sphere_t {
 
 	float	x_speed = 0.0f;
 	float	y_speed = 0.0f;		// 구의 초기 x축, y축 속력
+	vec3	v, a;
 	float	paused_time = 0.0f;	// 공이 멈췄던 시간 저장
 	bool	is_moving = true;
 	bool	stop_flag = false;
