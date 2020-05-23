@@ -11,7 +11,7 @@ GLuint	SphereTexture = 0;
 
 // global variables
 float	power = 8.2f;
-float	max_charge_time = 2.0f;
+float	max_charge_time = 1.0f;
 
 struct jp_t {//jump 게이지 표현
 	bool jumpping_now = false;

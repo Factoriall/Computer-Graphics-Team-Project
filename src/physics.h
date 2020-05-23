@@ -9,7 +9,7 @@ const float e_x = 0.47f;							// elasticity_x  x 방향 마찰계수
 const float e_y = 0.47f;							// elasticity_y  y 방향 마찰계수
 float		angle_const = 4.3f;
 float		last_t;
-float		maximum_friction = 0.01f;
+
 
 // const
 vec2		floor_elasticity = vec2(0.30f);
@@ -82,6 +82,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	int		is_collide = 0;
 	vec3	p0 = center;
 	float	del_t = (t - last_t);
+	float	maximum_friction = max(0.11f * del_t, 0.001f);
 	y_speed -= gravity * del_t;
 
 	vec3	pn = p0 + vec3(x_speed, y_speed, 0) * del_t;
@@ -89,7 +90,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	if (floor_collide(pn.y, floor_y, radius))	//바닥과 충돌 시
 	{
 		center.y = floor_y + radius;
-		if (abs(p0.y - center.y) > 0.01f) is_collide = 2;
+		if (abs(p0.y - center.y) > maximum_friction) is_collide = 2;
 		if (y_speed < 0) {
 			y_speed = -y_speed;
 		}
@@ -109,7 +110,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	{
 		// 왼쪽 벽
 		center.x = walls[1].center.x + radius;
-		if (abs(p0.x - center.x) > 0.01f) is_collide = 3;
+		if (abs(p0.x - center.x) > maximum_friction) is_collide = 3;
 		if (x_speed < 0) {
 			x_speed = -x_speed;
 		}
@@ -129,7 +130,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	if (wall_collide(pn.x, walls[2].center.x, radius))	//벽2과 충돌 시
 	{
 		center.x = walls[2].center.x - radius;
-		if (abs(p0.x - center.x) > 0.01f) is_collide = 3;
+		if (abs(p0.x - center.x) > maximum_friction) is_collide = 3;
 		if (x_speed > 0) {
 			x_speed = -x_speed;
 		}
@@ -162,7 +163,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 왼쪽
 			center.x = pl_x - plsize_x - radius;
-			if (abs(p0.x - center.x) > 0.01f) is_collide = 4;
+			if (abs(p0.x - center.x) > maximum_friction) is_collide = 4;
 			if (x_speed > 0) {
 				x_speed = -x_speed;
 			}
@@ -183,7 +184,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 아래
 			center.y = pl_y - plsize_y - radius;
-			if (abs(p0.y - center.y) > 0.01f) is_collide = 4;
+			if (abs(p0.y - center.y) > maximum_friction) is_collide = 4;
 			if (y_speed > 0) {
 				y_speed = -y_speed;
 			}
@@ -204,7 +205,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 오른쪽
 			center.x = pl_x + plsize_x + radius;
-			if (abs(p0.x - center.x) > 0.01f) is_collide = 4;
+			if (abs(p0.x - center.x) > maximum_friction) is_collide = 4;
 			if (x_speed < 0) {
 				x_speed = -x_speed;
 			}
@@ -225,7 +226,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 위쪽
 			center.y = pl_y + plsize_y + radius;
-			if (abs(p0.y - center.y) > 0.01f) is_collide = 4;
+			if (abs(p0.y - center.y) > maximum_friction) is_collide = 4;
 			if (y_speed < 0) {
 				y_speed = -y_speed;
 			}
