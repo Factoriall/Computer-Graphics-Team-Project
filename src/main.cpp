@@ -69,7 +69,8 @@ void update()
 	
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if ((collision_type = sphere.collision(floors, walls, plates, t, fps)) && sound_on && sphere.is_moving) {
+	if ((collision_type = sphere.collision(floors, walls, plates, t, fps)) && sound_on) {
+		printf("Sound! > %d\n", collision_type);
 		if (collision_type == 1) {
 			// collide with sample
 			engine->play2D(sound_src, false);
@@ -175,19 +176,19 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			if(key == GLFW_KEY_Z) cam_for_dev = camera();
 			else if (key == GLFW_KEY_W) {
 				//sphere.center += vec3(0, debug_move_speed*10, 0);
-				sphere.y_speed += 0.1f;
+				sphere.y_speed += 1.1f;
 			}
 			else if (key == GLFW_KEY_A) {
 				//sphere.center += vec3(-debug_move_speed*10, 0, 0);
-				sphere.x_speed -= 0.1f;
+				sphere.x_speed -= 1.1f;
 			}
 			else if (key == GLFW_KEY_S) {
 				//sphere.center += vec3(0, -debug_move_speed*10, 0);
-				sphere.y_speed -= 0.1f;
+				sphere.y_speed -= 1.1f;
 			}
 			else if (key == GLFW_KEY_D) {
 				//sphere.center += vec3(debug_move_speed*10, 0, 0);
-				sphere.x_speed += 0.1f;
+				sphere.x_speed += 1.1f;
 			}
 		}
 	}

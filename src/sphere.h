@@ -10,12 +10,8 @@ static const char* sphere_image_path = "../bin/images/earth.png";
 GLuint	SphereTexture = 0;
 
 // global variables
-float	power = 0.2f;
-bool	stop_simulation = false;
-float	paused_time = 0.0f;
-float	gauge = 0.0f;
-float	angle = 0.0f;
-float	game_speed = 100.0f;
+float	power = 8.2f;
+float	max_charge_time = 2.0f;
 
 struct jp_t {//jump 게이지 표현
 	bool jumpping_now = false;
@@ -30,7 +26,7 @@ struct jp_t {//jump 게이지 표현
 // implement fuctions
 void sphere_t::update(float t) {
 	
-	angle += angle_speed;
+	//angle += angle_speed;
 	// angle_speed *= 0.9f;
 
 	model_matrix = mat4::translate(center) *
@@ -38,16 +34,17 @@ void sphere_t::update(float t) {
 		mat4::scale(radius);
 }
 void jp_t::jump_action(sphere_t& sp) {
-	jump_once = true;
+	//jump_once = true;
+	float gauge = min(jp.endTime - jp.startTime, max_charge_time) * power;
+	float angle = pointer.angle + PI / 4.0f;//각도 조정
+
+
+	sp.x_speed += gauge * cos(angle);
+	sp.y_speed += gauge * sin(angle);
+	printf("Jump!  gauge: %f, v(x, y) = %.2f, %.2f\n", gauge, sp.x_speed, sp.y_speed);
 };
 float jp_t::get_gauge(float t) {
-	if (jumpping_now) {
-		return gauge = min(t - startTime, 2.0f);
-	}
-	else {
-		return 0;
-	}
-	
+	return  jumpping_now ? min((t - startTime)/max_charge_time, 1) : 0;
 }
 
 // render function
