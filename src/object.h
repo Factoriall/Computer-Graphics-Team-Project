@@ -58,8 +58,8 @@ struct sphere_t {
 	bool	stop_flag = false;
 
 	// public functions
-	void	update(float t);
-	int 	sphere_t::collision(std::vector <rect_t> & floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates, float t, int fps);
+	void	update(float del_t);
+	int 	sphere_t::collision(std::vector <rect_t> & floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates, float del_t);
 	bool	set_sphere_condition_stop(float t) {};
 	bool	set_sphere_condition_play() {};
 };

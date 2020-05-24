@@ -5,13 +5,13 @@
 
 // constant
 static const char* storm_image_path = "../bin/images/storm.jpg";
-static const float angle_speed = 0.02f;
+static const float angle_speed = 0.6f;
 
 // opengl variables
 GLuint	StormTexture = 0;
 
 // render function
-void render_storm(GLuint program, circle_t & storm) {
+void render_storm(GLuint program, circle_t & storm, float del_t) {
 	glBindVertexArray(circle_vertex_array);
 
 	if (StormTexture != 0) {
@@ -20,7 +20,7 @@ void render_storm(GLuint program, circle_t & storm) {
 		glUniform1i(glGetUniformLocation(program, "TEX"), 0);
 	}
 
-	storm.angle += angle_speed;
+	storm.angle += angle_speed * del_t;
 
 	mat4 model_matrix = mat4::translate(storm.center) *
 		mat4::rotate(vec3(0, 0, 1.0f), storm.angle) *

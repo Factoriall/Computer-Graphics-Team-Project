@@ -33,19 +33,24 @@ GLuint		program	= 0;				// ID holder for GPU program
 trackball	tb_dev, tb_play;			// trackball for devlopment
 
 //*************************************
-// global variables
-int			frame = 0;		// index of rendering frames
-float		t = 0.0f;		// glfwGetTime()
-bool		is_debug_mode = false;
-int			collision_type = 0;
-float		debug_move_speed = 0.06f;
-vec2		m0 = vec2(0);
-bool		sound_on = false;
-int			number_of_jump = 0;
-int			fps = 100;
-float		fps_count_time = 0.0f;
+// 설정용 변수
+bool		sound_on = true;			// 사운드 효과 on - off
+bool		is_debug_mode = false;		// 디버깅모드 on - off
+int			collision_type = 0;			// 충돌 타입
+
+// 게임 정보 표시용 변수
+int			number_of_jump = 0;			// 점프 횟수 카운트 변수
+int			frame = 0;					// 프레임 카운트 변수
+int			fps = 0;					// Frame Per Second, 초당 프레임 수
+float		fps_count_time = 0.0f;		// fps 측정 기준 시간
+
+// 시간계산 관련 변수
+float		t;							// 현재 시간
+float		last_t;						// 이전 시간
+float		del_t;						// del_t = t - last_t
 
 void update_fps() {
+	// 대략 1초마다 fps 값을 갱신한다.
 	if (t - fps_count_time > 1.0f) {
 		fps_count_time += 1.0f;
 		fps = frame;
@@ -53,23 +58,28 @@ void update_fps() {
 	}
 }
 void update_camera() {
+	// 카메라 matrix 계산
 	cam_for_play.update(sphere.center);
 
 	// update projection matrix
 	cam_now->aspect_ratio = window_size.x / float(window_size.y);
 	cam_now->projection_matrix = mat4::perspective(cam_now->fovy, cam_now->aspect_ratio, cam_now->dNear, cam_now->dFar);
 }
-
+void update_time() {
+	// 시간정보 갱신
+	t = float(glfwGetTime());  // now time
+	del_t = min(t - last_t, 0.1f);
+	last_t = t;
+}
 //*************************************
 void update()
 {
-	t = float(glfwGetTime());  // now time
-	update_fps();
-	update_camera();
-	
+	update_time();		// 시간정보 갱신
+	update_fps();		// fps 갱신
+	update_camera();	// 카메라 시야각 갱신
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if ((collision_type = sphere.collision(floors, walls, plates, t, fps)) && sound_on) {
+	if ((collision_type = sphere.collision(floors, walls, plates, del_t)) && sound_on) {
 		printf("Sound! > %d\n", collision_type);
 		if (collision_type == 1) {
 			// collide with sample
@@ -106,8 +116,8 @@ void render()
 	render_wall(program, walls);
 	render_floor(program, floors);
 	render_plate(program, plates);
-	render_sphere(program, sphere, t);
-	render_storm(program, storm);
+	render_sphere(program, sphere, del_t);
+	render_storm(program, storm, del_t);
 	render_introBoard(program, introBoard);
 	if (!sphere.is_moving) {
 		render_pointer(program, pointer, jp.get_gauge(t));

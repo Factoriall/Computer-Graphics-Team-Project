@@ -4,17 +4,16 @@
 #define __PHYSICS_H__
 #include "object.h"
 
-const float gravity = 12.3f;						// gravity
-float		angle_const = 4.3f;
-float		last_t;
+const float gravity = 12.3f;			// 중력값 계수
+float		angle_const = 4.3f;			// 구 회전속도 계수				
 
 // const
-vec2		floor_elasticity = vec2(0.30f);
-vec2		wall_elasticity = vec2(0.33f);
-vec2		plate_elasticity = vec2(0.33f);
-vec2		plate2_elasticity = vec2(0.03f, 0.33f);	//얼음
-vec2		plate3_elasticity = vec2(0.9f, 0.9f);	//끈끈이
-vec2		plate4_elasticity = vec2(0.33f, -0.6f);	//점프발판
+vec2		floor_elasticity = vec2(0.30f);			// 바닥
+vec2		wall_elasticity = vec2(0.33f);			// 벽
+vec2		plate_elasticity = vec2(0.33f);			// 기본
+vec2		plate2_elasticity = vec2(0.03f, 0.33f);	// 얼음
+vec2		plate3_elasticity = vec2(0.9f, 0.9f);	// 끈끈이
+vec2		plate4_elasticity = vec2(0.33f, -0.3f);	// 점프발판 << 수정이 필요
 
 
 // collide fuction
@@ -69,27 +68,27 @@ bool	plate_collide_4(float pl_x, float pl_y, float plsize_x, float plsize_y, flo
 	return 0;
 }
 
-int get_sign(float x) {
-	return (x > 0) ? 1 : -1;
-}
-
-
 // 실시간 구 좌표 값 변경 && 구 충돌 구현
-int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates, float t, int fps)
+int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& walls, std::vector <plate_t>& plates, float del_t)
 {
-	fps = 1;
-	float	floor_y = floors[0].center.y;	//y값
-	int		is_collide = 0;
-	vec3	p0 = center;
-	float	del_t = (t - last_t);
-	float	maximum_friction = max(0.11f * del_t, 0.01f);
-	y_speed -= gravity * del_t;
+	/*
+		is_collide 충돌 대상에 관한 정보
+		0 - 충돌 없음
+		1 - 정체불명의 충돌
+		2 - 바닥과 충돌
+		3 - 벽과 충돌
+		4+ - 발판과 충돌
+	*/
+	int		is_collide = 0;						// 충돌 대상 정보, return 값
+	vec3	p0 = center;						// 이전 구 좌표 저장
+	float	maximum_friction =  0.5f * del_t;	// 이동거리에 따른 정지 판정 기준 
+	y_speed -= gravity * del_t;					// 중력 적용
 
-	vec3	pn = p0 + vec3(x_speed, y_speed, 0) * del_t;
+	vec3	pn = p0 + vec3(x_speed, y_speed, 0) * del_t;	// 공의 다음 위치 계산
 
-	if (floor_collide(pn.y, floor_y, radius))	//바닥과 충돌 시
+	if (floor_collide(pn.y, floors[0].center.y, radius))	//바닥과 충돌 시
 	{
-		center.y = floor_y + radius;
+		center.y = floors[0].center.y + radius;
 		if (abs(p0.y - center.y) > maximum_friction) is_collide = 2;
 		if (y_speed < 0) {
 			y_speed = -y_speed;
@@ -149,19 +148,18 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 
 	for (auto& plates : plates)
 	{
-		float pl_x = plates.center.x;
-		float pl_y = plates.center.y;	//x,y좌표
-		float plsize_x = plates.scale.x / 2;
-		float plsize_y = plates.scale.y / 2;	//x,y크기의 1/2
-		pl_y += plsize_y;	//정중앙이 아니었던거임~~
+		float pl_x = plates.center.x, pl_y = plates.center.y;				// 발판의 x, y좌표
+		float plsize_x = plates.scale.x / 2, plsize_y = plates.scale.y / 2;	// 발판의 x, y크기의 절반
+		pl_y += plsize_y;	// 발판 높이 보정
 
 		if ((pl_x - pn.x) * (pl_x - pn.x) + (pl_y - pn.y) * (pl_y - pn.y) > (radius + plsize_x + plsize_y) * (radius + plsize_x + plsize_y))
-		{
+		{	
+			// 발판과의 충돌이 없음
 			continue;
 		}
-		if (plate_collide_1(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))	// plate 안의 rect[1]와 충돌
+		if (plate_collide_1(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))
 		{
-			// 왼쪽
+			// 왼쪽면과 충돌 처리
 			center.x = pl_x - plsize_x - radius;
 			if (abs(p0.x - center.x) > maximum_friction) is_collide = 4;
 			if (x_speed > 0) {
@@ -177,12 +175,10 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			}
 			
 			angle_speed = -y_speed * angle_const;
-			//center.x = pl_x - plsize_x - radius;
-			
 		}
-		if (plate_collide_2(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))	// plate 안의 rect[2]와 충돌
+		if (plate_collide_2(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))
 		{
-			// 아래
+			// 아랫면과 충돌 처리
 			center.y = pl_y - plsize_y - radius;
 			if (abs(p0.y - center.y) > maximum_friction) is_collide = 4;
 			if (y_speed > 0) {
@@ -196,14 +192,11 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			if (abs(y_speed) < maximum_friction) {
 				y_speed = 0;
 			}
-
-			angle_speed = -x_speed * angle_const;
-			//center.y = pl_y - plsize_y - radius;
-			
+			angle_speed = -x_speed * angle_const;		
 		}
-		if (plate_collide_3(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))	// plate 안의 rect[3]와 충돌
+		if (plate_collide_3(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))
 		{
-			// 오른쪽
+			// 오른쪽 면과 충돌 처리
 			center.x = pl_x + plsize_x + radius;
 			if (abs(p0.x - center.x) > maximum_friction) is_collide = 4;
 			if (x_speed < 0) {
@@ -217,18 +210,12 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			if (abs(y_speed) < maximum_friction) {
 				y_speed = 0;
 			}
-	
-			angle_speed = -y_speed * angle_const;
-			//center.x = pl_x + plsize_x + radius;
-			
+			angle_speed = -y_speed * angle_const;	
 		}
-
-		
-		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))	// plate 안의 rect[4]와 충돌
+		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))
 		{
-			// 위쪽
-			float new_ex;
-			float new_ey;	// 발판 종류마다 마찰계수 다름
+			// 위쪽면과 충돌 처리
+			float new_ex, new_ey;	// 발판 종류마다 마찰계수 다름
 			switch (plates.type)
 			{
 			case 1:
@@ -261,35 +248,33 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			if (abs(y_speed) < maximum_friction) {
 				y_speed = 0;
 			}
-
 			angle_speed = -x_speed * angle_const;
-			//center.y = pl_y + plsize_y + radius;
-			
 		}
-		
 	}
 
-	center += vec3(x_speed, y_speed, 0) * del_t;
+	center += vec3(x_speed, y_speed, 0) * del_t;	// 실제 위치 계산
 	
 	if ((p0 - center).length() < maximum_friction) {
+		// 매우 작은 움직임 발생
 		if (stop_flag) {
-			if (t - paused_time > 0.5f) {
+			// 계속 정지중
+			paused_time += del_t;
+			if (paused_time > 0.5f) {
+				// 특정 시간 이상 정지 시 움직이지 않음 으로 확정 (가만히 있음)
 				is_moving = false;
 			}
 		}
 		else {
-			paused_time = t;
+			// 구의 정지를 확인
 			stop_flag = true;
+			paused_time = del_t;
 		}
-
-		// return 0;
 	}
 	else {
+		// 움직이고 있음
 		is_moving = true;
 		stop_flag = false;
 	}
-
-	last_t = t;
 
 	return is_collide;
 }
