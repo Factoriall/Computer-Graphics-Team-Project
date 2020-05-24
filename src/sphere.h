@@ -10,7 +10,7 @@ static const char* sphere_image_path = "../bin/images/earth.png";
 GLuint	SphereTexture = 0;
 
 // global variables
-float	power = 8.2f;
+float	power = 12.2f;
 float	max_charge_time = 1.0f;
 
 struct jp_t {//jump 게이지 표현

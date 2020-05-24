@@ -37,9 +37,10 @@ struct plate_t {
 	vec3 scale = vec3(1.0f);					// scale of ( x-size, y-size, z-size )
 	float angle = 0;							// not use yet
 	rect_t rect[6];								// cube uses 6 rectngles
+	int type;			// 1: 그냥 2: 얼음 3: 끈끈이 4: 점프발판
 
 	mat4 model_matrix;							// modeling transformation
-	void make_plate(vec3 _center, vec3 _scale);
+	void make_plate(vec3 _center, vec3 _scale, int _type);
 };
 struct sphere_t {
 	vec3	center = vec3(0);

@@ -40,7 +40,7 @@ bool		is_debug_mode = false;
 int			collision_type = 0;
 float		debug_move_speed = 0.06f;
 vec2		m0 = vec2(0);
-bool		sound_on = true;
+bool		sound_on = false;
 int			number_of_jump = 0;
 int			fps = 100;
 float		fps_count_time = 0.0f;
@@ -306,7 +306,11 @@ bool user_init()
 	update_circle_vertex_buffer(unit_circle_vertices);
 
 	// assign texture to each components.
-	PlateTexture = create_texture(plate_image_path, true);
+	Plate1Texture = create_texture(plate1_image_path, true);
+	Plate2Texture = create_texture(plate2_image_path, true);
+	Plate3Texture = create_texture(plate3_image_path, true);
+	Plate4Texture = create_texture(plate4_image_path, true);
+
 	SphereTexture = create_texture(sphere_image_path, true);
 	WallTexture = create_texture(brick_image_path, true);
 	FloorTexture = create_texture(floor_image_path, true);

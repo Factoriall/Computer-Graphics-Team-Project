@@ -4,18 +4,18 @@
 #define __PHYSICS_H__
 #include "object.h"
 
-const float gravity = 9.87f;						// gravity
-const float e_x = 0.47f;							// elasticity_x  x 방향 마찰계수
-const float e_y = 0.47f;							// elasticity_y  y 방향 마찰계수
+const float gravity = 12.3f;						// gravity
 float		angle_const = 4.3f;
 float		last_t;
-
 
 // const
 vec2		floor_elasticity = vec2(0.30f);
 vec2		wall_elasticity = vec2(0.33f);
 vec2		plate_elasticity = vec2(0.33f);
-vec2		_elasticity = vec2(0.33f);
+vec2		plate2_elasticity = vec2(0.03f, 0.33f);	//얼음
+vec2		plate3_elasticity = vec2(0.9f, 0.9f);	//끈끈이
+vec2		plate4_elasticity = vec2(0.33f, -0.6f);	//점프발판
+
 
 // collide fuction
 bool	floor_collide(float sphere_center_y, float floor_y, float radius)	//바닥과 충돌 감지
@@ -82,7 +82,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	int		is_collide = 0;
 	vec3	p0 = center;
 	float	del_t = (t - last_t);
-	float	maximum_friction = max(0.11f * del_t, 0.001f);
+	float	maximum_friction = max(0.11f * del_t, 0.01f);
 	y_speed -= gravity * del_t;
 
 	vec3	pn = p0 + vec3(x_speed, y_speed, 0) * del_t;
@@ -222,16 +222,39 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			//center.x = pl_x + plsize_x + radius;
 			
 		}
+
+		
 		if (plate_collide_4(pl_x, pl_y, plsize_x, plsize_y, pn.x, pn.y, radius))	// plate 안의 rect[4]와 충돌
 		{
 			// 위쪽
+			float new_ex;
+			float new_ey;	// 발판 종류마다 마찰계수 다름
+			switch (plates.type)
+			{
+			case 1:
+				new_ex = plate_elasticity.x;
+				new_ey = plate_elasticity.y;
+				break;
+			case 2:
+				new_ex = plate2_elasticity.x;
+				new_ey = plate2_elasticity.y;
+				break;
+			case 3:
+				new_ex = plate3_elasticity.x;
+				new_ey = plate3_elasticity.y;
+				break;
+			case 4:
+				new_ex = plate4_elasticity.x;
+				new_ey = plate4_elasticity.y;
+				break;
+			}
 			center.y = pl_y + plsize_y + radius;
 			if (abs(p0.y - center.y) > maximum_friction) is_collide = 4;
 			if (y_speed < 0) {
 				y_speed = -y_speed;
 			}
-			x_speed -= x_speed * plate_elasticity.x;
-			y_speed -= y_speed * plate_elasticity.y;
+			x_speed -= x_speed * new_ex;
+			y_speed -= y_speed * new_ey;
 			if (abs(x_speed) < maximum_friction) {
 				x_speed = 0;
 			}
@@ -243,6 +266,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 			//center.y = pl_y + plsize_y + radius;
 			
 		}
+		
 	}
 
 	center += vec3(x_speed, y_speed, 0) * del_t;
