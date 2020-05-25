@@ -27,11 +27,7 @@ struct rect_t {
 	vec3	axle = vec3(0);
 	float	angle = 0;
 };
-struct circle_t {
-	vec3	center = vec3(0);
-	float	scale = 1.0f;
-	float	angle = 0.0f;
-};
+
 struct plate_t {
 	vec3 center = vec3(0);						// position of center ( x, y, z )
 	vec3 scale = vec3(1.0f);					// scale of ( x-size, y-size, z-size )
@@ -63,7 +59,15 @@ struct sphere_t {
 	bool	set_sphere_condition_stop(float t) {};
 	bool	set_sphere_condition_play() {};
 };
-
+struct circle_t {
+	vec3	center = vec3(0);
+	float	scale = 1.0f;
+	float	angle = 0.0f;
+	float	angle_speed = 0.6f;
+	float	proceed = 0;
+	bool	in_storm(vec3 sp_center, float sp_r);
+	int		go_to_storm(sphere_t& sp, camera& cam, float del_t);
+};
 
 // create vertex vector
 std::vector<vertex> create_rect_vertices() // create vertices of the wall - rectangle

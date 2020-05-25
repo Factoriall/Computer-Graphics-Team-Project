@@ -37,12 +37,21 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 bool		sound_on = true;			// 사운드 효과 on - off
 bool		is_debug_mode = false;		// 디버깅모드 on - off
 int			collision_type = 0;			// 충돌 타입
+float		game_speed = 1.0f;			// 게임의 전체적인 속도 조절 (기본값 x1.0)
+/*	game_mod 게임의 상태
+	0 - 초기화 & 인트로
+	1 - 게임 중
+	2 - 폭풍속으로
+	3 - 아웃트로
+*/
+int			game_mod = 0;
 
 // 게임 정보 표시용 변수
 int			number_of_jump = 0;			// 점프 횟수 카운트 변수
 int			frame = 0;					// 프레임 카운트 변수
 int			fps = 0;					// Frame Per Second, 초당 프레임 수
 float		fps_count_time = 0.0f;		// fps 측정 기준 시간
+float		play_time = 0;
 
 // 시간계산 관련 변수
 float		t;							// 현재 시간
@@ -51,7 +60,7 @@ float		del_t;						// del_t = t - last_t
 
 void update_fps() {
 	// 대략 1초마다 fps 값을 갱신한다.
-	if (t - fps_count_time > 1.0f) {
+	if (play_time - fps_count_time > 1.0f) {
 		fps_count_time += 1.0f;
 		fps = frame;
 		frame = 0;
@@ -59,7 +68,7 @@ void update_fps() {
 }
 void update_camera() {
 	// 카메라 matrix 계산
-	cam_for_play.update(sphere.center);
+	if(game_mod!=3) cam_for_play.update(sphere.center);
 
 	// update projection matrix
 	cam_now->aspect_ratio = window_size.x / float(window_size.y);
@@ -68,7 +77,7 @@ void update_camera() {
 void update_time() {
 	// 시간정보 갱신
 	t = float(glfwGetTime());  // now time
-	del_t = min(t - last_t, 0.1f);
+	del_t = min(t - last_t, 0.1f) * game_speed;
 	last_t = t;
 }
 //*************************************
@@ -76,31 +85,70 @@ void update()
 {
 	update_time();		// 시간정보 갱신
 	update_fps();		// fps 갱신
-	update_camera();	// 카메라 시야각 갱신
+	update_camera();	// 카메라 위치와 시야 갱신
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if ((collision_type = sphere.collision(floors, walls, plates, del_t)) && sound_on) {
-		printf("Sound! > %d\n", collision_type);
+	if (game_mod == 1 && (collision_type = sphere.collision(floors, walls, plates, del_t)) && sound_on) {
 		if (collision_type == 1) {
 			// collide with sample
 			engine->play2D(sound_src, false);
+			printf("sound : (무언가 부딧힌 소리)\n");
 		}
 		else if (collision_type == 2) {
 			// collide with floor
 			engine->play2D(sound_floor_src, false);
+			printf("sound : (잔디 밟는 소리)\n");
 		}
 		else if (collision_type == 3) {
 			// collide with wall
 			engine->play2D(sound_wall_src, false);
+			printf("sound : (벽과 부딧힌 소리)\n");
 		}
 		else if (collision_type == 4) {
-			// collide with plate
+			// collide with normal plate
 			engine->play2D(sound_plate_src, false);
+			printf("sound : (발판 밟는 소리)\n");
+		}
+		else if (collision_type == 5) {
+			// collide with  ice plate
+			//engine->play2D(sound_plate_src, false);
+			printf("sound : (발판 밟는 소리)\n");
+		}
+		else if (collision_type == 6) {
+			// collide with sticky plate
+			//engine->play2D(sound_plate_src, false);
+			printf("sound : (발판 밟는 소리)\n");
+		}
+		else if (collision_type == 7) {
+			// collide with jump plate
+			//engine->play2D(sound_plate_src, false);
+			power += 4.0f;
+			printf("sound : (발판 밟는 소리)\n");
 		}
 	}
 
 	// 포인터를 구에 고정
 	pointer.center = sphere.center;
+
+	if (game_mod == 1 && storm.in_storm(sphere.center, sphere.radius)) {
+		printf("system : 폭풍속으로~\n");
+		sphere_pos = sphere.center;
+		del_sphere_pos = storm.center - sphere_pos;
+		cam_at = cam_for_play.at;
+		del_cam_at = storm.center - cam_at;
+		cam_eye = cam_for_play.eye;
+		del_cam_eye = storm.center + vec3(0, 0, 5) - cam_eye;
+		game_mod = 2;	// 게임 모드 변경 (충돌함수가 동작하지 않게 끔)
+	}
+	if (game_mod == 2) {
+		// 폭풍속으로 들어가는 지구 구현
+		if (storm.go_to_storm(sphere, cam_for_play, del_t)) {
+			game_mod = 3;	// 최종단계 진입
+		}
+	}
+	if (game_mod == 3) {
+		// 엔딩 크레딧
+	}
 	
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
@@ -113,6 +161,7 @@ void render()
 	// clear screen (with background color) and clear depth buffer
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+	
 	render_wall(program, walls);
 	render_floor(program, floors);
 	render_plate(program, plates);
@@ -128,9 +177,11 @@ void render()
 	float dpi_scale = cg_get_dpi_scale();
 	render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	render_text((std::string(str_play_time) + std::to_string(t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	render_text((std::string(str_play_time) + std::to_string(play_time+=del_t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	
+	if (game_mod == 3) {
+		render_text("WIN!!", window_size.x/2-70, window_size.y/2+70, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	}
 	// notify GL that we use our own program
 	glUseProgram(program);
 	
@@ -149,7 +200,8 @@ void reshape( GLFWwindow* window, int width, int height )
 void print_help()
 {
 	printf( "[help]\n" );
-	printf( "- press ESC or 'q' to terminate the program\n" );
+	printf( "- press 'q' to terminate the program\n" );
+	printf( "- press 'ESC' to pause the program\n");
 	printf( "- press F1 or 'h' to see help\n" );
 	printf("- press F2 to see how to play\n");
 	printf("- press 'TAB' to switch debug mode\n");
@@ -161,7 +213,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
 	if(action==GLFW_PRESS)
 	{
-		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
+		if(key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();	
 		else if (key == GLFW_KEY_TAB) {
 			if (is_debug_mode) {
@@ -172,6 +224,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			}
 			is_debug_mode = !is_debug_mode;
 			printf(" > mode change : %s mode now\n", is_debug_mode ? "debug" : "play" );
+		}
+		else if (key == GLFW_KEY_ESCAPE) {
+			game_speed = !game_speed;
 		}
 		else if (key == GLFW_KEY_F2) {
 			printf(" > show intro\n");
@@ -297,7 +352,7 @@ bool user_init()
 	// init GL states
 	glClearColor(39/255.0f, 40/255.0f, 34/255.0f, 1.0f);	// set clear color
 	glEnable(GL_BLEND);
-	glEnable(GL_CULL_FACE);								// turn on backface culling
+	glEnable(GL_CULL_FACE);									// turn on backface culling
 	glEnable(GL_DEPTH_TEST);								// turn on depth tests
 	glEnable(GL_TEXTURE_2D);								// enable texturing
 	glActiveTexture(GL_TEXTURE0);							// notify GL the current texture slot is 0
@@ -334,6 +389,8 @@ bool user_init()
 	cam_intro.eye = vec3(30.0f, 3.75f, 9.3f);
 	cam_intro.at = vec3(30.0f, 3.75f, 0);
 	cam_intro.update();
+
+	game_mod = 1;
 
 	return true;
 }

@@ -5,12 +5,12 @@
 
 // constant
 static const char* sphere_image_path = "../bin/images/earth.png";
-
+static const float basic_power = 12.3f;
 // opengl variables
 GLuint	SphereTexture = 0;			// 구의 텍스쳐 정보
 
 // global variables
-float	power = 12.3f;
+float	power = basic_power;		// 점프 위력 변수
 float	max_charge_time = 1.0f;		// 최대 충전 시간
 float	min_charge_time = 0.4f;		// 최소 충전 시간
 float	charge_range = max_charge_time - min_charge_time;
@@ -37,9 +37,10 @@ void jp_t::jump_action(sphere_t& sp) {
 	float gauge = min((jp.endTime - jp.startTime)/charge_range + min_charge_time, max_charge_time) * power;
 	float angle = pointer.angle + PI / 4.0f; // 각도 조정
 
-	sp.angle_speed = cos(angle) * gauge;
+	sp.angle_speed = -cos(angle) * gauge;
 	sp.x_speed += gauge * cos(angle);
 	sp.y_speed += gauge * sin(angle);
+	power = basic_power;					// 원래 파워로 복구
 	printf("Jump!  gauge: %f, v(x, y) = %.2f, %.2f\n", gauge, sp.x_speed, sp.y_speed);
 };
 float jp_t::get_gauge(float t) {
