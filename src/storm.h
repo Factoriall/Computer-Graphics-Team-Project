@@ -59,7 +59,7 @@ int circle_t::go_to_storm(sphere_t & sp, camera & cam, float del_t) {
 // creating object functions
 inline circle_t create_storm() //function to save the information about walls - 3 walls
 {
-	return { vec3(0.0f, 29.0f, 1.0f), 1.0f, 0.0f};	// ¸Ê À§¿¡ »ý¼º
+	return { vec3(0.0f, 64.0f, 1.0f), 1.0f, 0.0f};	// ¸Ê À§¿¡ »ý¼º
 	//return { vec3(2.0f, 2.0f, 0.3f), 1.0f, 0.0f };		// ¹Ù·Î ¿·¿¡ »ý¼º
 }
 

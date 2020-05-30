@@ -5,7 +5,7 @@
 // camera structure
 struct camera
 {
-	vec3	eye = vec3(0, 2.0f, 10.0f);//camera position
+	vec3	eye = vec3(0, 2.0f, 14.0f);//camera position
 	vec3	at = vec3(0, 0.0f, 0.0f);//target position
 	vec3	up = vec3(0, 1, 0);//up
 	mat4	view_matrix = mat4::look_at(eye, at, up);
@@ -21,7 +21,8 @@ struct camera
 
 // implement fuction
 void camera::update(vec3 sphere_center) {
-	eye.y = sphere_center.y + 2.0f;
+	eye.y = sphere_center.y + 4.0f;
+	eye.x = sphere_center.x;	// 눈이 공 따라가게
 	at = sphere_center;
 	view_matrix = mat4::look_at(eye, at, up);
 }

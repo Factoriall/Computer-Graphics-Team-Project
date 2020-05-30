@@ -61,26 +61,79 @@ inline std::vector<plate_t> create_plates() {
 	plate_t cube;
 
 	// 뒷 벽을 기준으로 x 가 좌우, y가 높이(y_scale = 0.1f 고정), z가 앞뒤(z=2.0f, z_scale=2.0f) 고정하면 대충 맵에 맞음
-	cube.make_plate(vec3(0.0f, 3, 2) + away_from_map, vec3(6.0f, 0.5f, 2.0f), 2);
+	// (x,y,z (고정) ) -> 위치 , (x' , y' , z' (고정) -> 크기 )  x'/2 + x 가 15.5, -14.5이상되면 안됨
+	cube.make_plate(vec3(-3.0f, 2, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	cube.make_plate(vec3(-2.0f, 6, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f), 3);
+	cube.make_plate(vec3(-6.0f, 4, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	cube.make_plate(vec3(2.0f, 9, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f), 4);
+	cube.make_plate(vec3(-9.0f, 6, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	//cube.make_plate(vec3(1.0f, 12, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f), 1);
-	//cube_vector.push_back(cube);
-	cube.make_plate(vec3(-3.0f, 15, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f),1 );
+	cube.make_plate(vec3(-12.0f, 8, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	cube.make_plate(vec3(1.0f, 18, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f),1);
-	cube_vector.push_back(cube); 
-	cube.make_plate(vec3(4.0f, 21, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f),2);
+	cube.make_plate(vec3(-9.0f, 11, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	cube.make_plate(vec3(-3.0f, 24, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f),1);
+	cube.make_plate(vec3(-5.0f, 14, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	cube.make_plate(vec3(1.0f, 24, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f),3);
+	cube.make_plate(vec3(-1.0f, 11, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
-	cube.make_plate(vec3(0.5f, 27, 2) + away_from_map, vec3(3.0f, 0.5f, 2.0f),1);
+	cube.make_plate(vec3(7.0f, 11, 2) + away_from_map, vec3(6.0f, 0.6f, 4.0f), 3);
 	cube_vector.push_back(cube);
+	cube.make_plate(vec3(11.0f, 14, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(14.0f, 17, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(11.0f, 20, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+
+	cube.make_plate(vec3(6.0f, 23, 2) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(1.0f, 26, 2) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-4.0f, 23, 2) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-9.0f, 26, 2) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-13.0f, 29, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-9.0f, 32, 2) + away_from_map, vec3(2.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-5.0f, 34, 2) + away_from_map, vec3(2.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-1.0f, 33, 2) + away_from_map, vec3(2.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(4.0f, 38, 2) + away_from_map, vec3(2.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+
+	cube.make_plate(vec3(10.0f, 36, 2) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(13.0f, 34, 3) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 4);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(10.0f, 47, 3) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(6.0f, 44, 3) + away_from_map, vec3(3.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(1.0f, 45, 3) + away_from_map, vec3(4.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-6.0f, 41, 3) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-13.0f, 44, 3) + away_from_map, vec3(2.0f, 0.6f, 4.0f), 3);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-14.0f, 49, 3) + away_from_map, vec3(1.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+
+	cube.make_plate(vec3(-9.0f, 52, 3) + away_from_map, vec3(7.0f, 0.6f, 4.0f), 2);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(-3.0f, 53, 3) + away_from_map, vec3(4.5f, 0.6f, 4.0f), 2);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(4.0f, 54, 3) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 2);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(11.0f, 57, 3) + away_from_map, vec3(5.0f, 0.6f, 4.0f), 1);
+	cube_vector.push_back(cube);
+	cube.make_plate(vec3(10.0f, 61, 3) + away_from_map, vec3(7.0f, 0.6f, 4.0f), 2);
+	cube_vector.push_back(cube);
+
+
+
 
 	return cube_vector;
 }

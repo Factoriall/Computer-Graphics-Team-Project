@@ -34,7 +34,7 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 
 //*************************************
 // 설정용 변수
-bool		sound_on = true;			// 사운드 효과 on - off
+bool		sound_on = false;			// 사운드 효과 on - off
 bool		is_debug_mode = false;		// 디버깅모드 on - off
 int			collision_type = 0;			// 충돌 타입
 float		game_speed = 1.0f;			// 게임의 전체적인 속도 조절 (기본값 x1.0)
@@ -87,6 +87,12 @@ void update()
 	update_fps();		// fps 갱신
 	update_camera();	// 카메라 위치와 시야 갱신
 
+	if (collision_type == 7)
+	{
+		power = (float)basic_power * 1.6f;
+	}
+	//printf("%f\n", power); 파워 체크
+
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
 	if (game_mod == 1 && (collision_type = sphere.collision(floors, walls, plates, del_t)) && sound_on) {
 		if (collision_type == 1) {
@@ -122,7 +128,6 @@ void update()
 		else if (collision_type == 7) {
 			// collide with jump plate
 			//engine->play2D(sound_plate_src, false);
-			power += 4.0f;
 			printf("sound : (발판 밟는 소리)\n");
 		}
 	}

@@ -11,9 +11,9 @@ float		angle_const = 4.3f;			// 구 회전속도 계수
 vec2		floor_elasticity = vec2(0.30f);			// 바닥
 vec2		wall_elasticity = vec2(0.13f);			// 벽
 vec2		plate_elasticity = vec2(0.33f);			// 기본 발판
-vec2		plate2_elasticity = vec2(0.08f, 0.33f);	// 얼음 발판
+vec2		plate2_elasticity = vec2(0.06f, 0.5f);	// 얼음 발판
 vec2		plate3_elasticity = vec2(0.9f, 0.9f);	// 끈끈이 발판
-vec2		plate4_elasticity = vec2(0.33f, 0.33f);	// 점프발판 발판
+vec2		plate4_elasticity = vec2(0.33f, 0.33f);	// 점프 발판
 
 
 // collide fuction
@@ -103,9 +103,10 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		}
 
 		angle_speed = -x_speed*angle_const;
+
 	}
 
-	if (wall_collide(pn.x, walls[1].center.x, radius))	//벽1과 충돌 시
+	else if (wall_collide(pn.x, walls[1].center.x, radius))	//벽1과 충돌 시
 	{
 		// 왼쪽 벽
 		center.x = walls[1].center.x + radius;
@@ -126,7 +127,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		
 	}
 
-	if (wall_collide(pn.x, walls[2].center.x, radius))	//벽2과 충돌 시
+	else if (wall_collide(pn.x, walls[2].center.x, radius))	//벽2과 충돌 시
 	{
 		center.x = walls[2].center.x - radius;
 		if (abs(p0.x - center.x) > maximum_friction) is_collide = 3;
@@ -275,7 +276,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		is_moving = true;
 		stop_flag = false;
 	}
-
+	
 	return is_collide;
 }
 
