@@ -33,7 +33,7 @@ void camera::update() {
 camera	cam_for_dev;
 camera	cam_for_play;
 camera	cam_intro;
-camera* cam_now = &cam_for_play;
+camera* cam_now = &cam_intro;
 
 #endif
 

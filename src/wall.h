@@ -38,9 +38,13 @@ inline std::vector<rect_t> create_walls() //function to save the information abo
 	
 	w = { vec3(0), vec2(30.0f, 100.0f), vec3(0, 1.0f, 0), 0 };
 	walls.emplace_back(w);
-	w = { vec3(-15.0f, 0, 1.0f), vec2(8.0f, 100.0f), vec3(0, 1.0f, 0), PI / 2.0f };
+	w = { vec3(-15.0f, 0, 1.0f), vec2(20.0f, 100.0f), vec3(0, 1.0f, 0), PI / 2.0f };
 	walls.emplace_back(w);
-	w = { vec3(15.0f, 0, 1.0f), vec2(8.0f, 100.0f), vec3(0, 1.0f, 0), (PI * 3.0f) / 2.0f };
+	w = { vec3(15.0f, 0, 1.0f), vec2(20.0f, 100.0f), vec3(0, 1.0f, 0), (PI * 3.0f) / 2.0f };
+	walls.emplace_back(w);
+	w = { vec3(30.0f, 0, 10.0f), vec2(30.0f, 30.0f), vec3(0, 1.0f, 0), 0 };
+	walls.emplace_back(w);
+	w = { vec3(-30.0f, 0, 10.0f), vec2(30.0f, 30.0f), vec3(0, 1.0f, 0), 0 };
 	walls.emplace_back(w);
 
 	return walls;

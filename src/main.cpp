@@ -13,6 +13,7 @@
 #include "physics.h"	// physics
 #include "text.h"		// text
 #include "storm.h"		// 히오스 배너
+#include "particle.h"
 
 //*************************************
 // global constants
@@ -42,7 +43,8 @@ float		game_speed = 1.0f;			// 게임의 전체적인 속도 조절 (기본값 x1.0)
 	0 - 초기화 & 인트로
 	1 - 게임 중
 	2 - 폭풍속으로
-	3 - 아웃트로
+	3 - 폭발 이펙트
+	4 - 아웃트로
 */
 int			game_mod = 0;
 
@@ -52,6 +54,7 @@ int			frame = 0;					// 프레임 카운트 변수
 int			fps = 0;					// Frame Per Second, 초당 프레임 수
 float		fps_count_time = 0.0f;		// fps 측정 기준 시간
 float		play_time = 0;
+float		end = 0.0f;
 
 // 시간계산 관련 변수
 float		t;							// 현재 시간
@@ -146,14 +149,16 @@ void update()
 		game_mod = 2;	// 게임 모드 변경 (충돌함수가 동작하지 않게 끔)
 	}
 	if (game_mod == 2) {
+		
 		// 폭풍속으로 들어가는 지구 구현
 		if (storm.go_to_storm(sphere, cam_for_play, del_t)) {
 			game_mod = 3;	// 최종단계 진입
 		}
 	}
 	if (game_mod == 3) {
-		// 엔딩 크레딧
+		for (auto& p : particles) p.update();
 	}
+	
 	
 	// update uniform variables in vertex/fragment shaders
 	GLint uloc;
@@ -164,8 +169,8 @@ void update()
 void render()
 {
 	// clear screen (with background color) and clear depth buffer
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_BLEND);
 	
 	render_wall(program, walls);
 	render_floor(program, floors);
@@ -180,15 +185,34 @@ void render()
 	
 	// render texts
 	float dpi_scale = cg_get_dpi_scale();
-	render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	render_text((std::string(str_play_time) + std::to_string(play_time+=del_t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-	render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	if (game_mod == 0) {
+		render_text("Click to start!", window_size.x / 3, window_size.y * 3 / 4, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	}
+	if (game_mod == 1) {
+		render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text((std::string(str_play_time) + std::to_string(play_time += del_t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	}
+	
 	if (game_mod == 3) {
 		render_text("WIN!!", window_size.x/2-70, window_size.y/2+70, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("Click to finish", window_size.x / 3, window_size.y * 3 / 4, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	}
+	if (game_mod == 4) {
+		float dpi_scale = cg_get_dpi_scale();
+		float ct = float(glfwGetTime());
+		render_text("Ending Credit", 100, GLint((float(ct - end) * 30.0f)), 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
+		render_text("I love Computer Graphics!", 100, GLint((ct - end) * 30.0f) + 25, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
+		render_text("Creater: Nam, Bae, Byeon", 100, GLint((ct - end) * 30.0f) + 50, 0.6f, vec4(0.5f, 0.7f, 0.7f, 0.8f), dpi_scale);
+	}
+	
 	// notify GL that we use our own program
 	glUseProgram(program);
+	if (game_mod == 3) {
+		render_particle(program, particles);
+	}
+	
 	
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -222,9 +246,11 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();	
 		else if (key == GLFW_KEY_TAB) {
 			if (is_debug_mode) {
+				gravity = 12.3f;
 				cam_now = &cam_for_play;
 			}
 			else {
+				gravity = 0.0f;
 				cam_now = &cam_for_dev;
 			}
 			is_debug_mode = !is_debug_mode;
@@ -237,6 +263,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			printf(" > show intro\n");
 			cam_now = &cam_intro;
 		}
+
 		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) { // jump charge start
 			jp.startTime = float(glfwGetTime());
 			jp.jumpping_now = true;
@@ -279,7 +306,16 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 	{
 		dvec2 pos; glfwGetCursorPos(window,&pos.x,&pos.y);
 		printf( "> Left mouse button pressed at (%d, %d)\n", int(pos.x), int(pos.y) );
+		if (game_mod == 0) {
+			game_mod = 1;
+			cam_now = &cam_for_play;
+		}
+		if (game_mod == 3) {
+			game_mod = 4;
+			end = float(glfwGetTime());
+		}
 	}
+	
 
 	if (is_debug_mode) {
 		// ------------------------------------- track ball mouse code		---------------------------------------------//							
@@ -356,14 +392,13 @@ bool user_init()
 
 	// init GL states
 	glClearColor(39/255.0f, 40/255.0f, 34/255.0f, 1.0f);	// set clear color
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);									// turn on backface culling
 	glEnable(GL_DEPTH_TEST);								// turn on depth tests
 	glEnable(GL_TEXTURE_2D);								// enable texturing
 	glActiveTexture(GL_TEXTURE0);							// notify GL the current texture slot is 0
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	
 
 	// load the objects we need in our project
 	std::vector<vertex> unit_rect_vertices = create_rect_vertices();
@@ -374,6 +409,8 @@ bool user_init()
 	update_pointer_vertex_buffer(unit_pointer_vertices);
 	std::vector<vertex> unit_circle_vertices = create_circle_vertices();
 	update_circle_vertex_buffer(unit_circle_vertices);
+	std::vector<vertex> unit_particle_vertices = create_particle_vertices();
+	update_particle_vertex_buffer(unit_particle_vertices);
 
 	// assign texture to each components.
 	Plate1Texture = create_texture(plate1_image_path, true);
@@ -387,15 +424,19 @@ bool user_init()
 	IntroTexture = create_texture(intro_image_path, true);
 	PointerTexture = create_texture(pointer_image_path, true);
 	StormTexture = create_texture(storm_image_path, true);
+	ParticleTexture = create_texture(particle_image_path, false);
+
 
 	// setup freetype
 	if (!init_text()) return false;
+
+	particles.resize(particle_t::MAX_PARTICLES);
 
 	cam_intro.eye = vec3(30.0f, 3.75f, 9.3f);
 	cam_intro.at = vec3(30.0f, 3.75f, 0);
 	cam_intro.update();
 
-	game_mod = 1;
+	game_mod = 0;
 
 	return true;
 }

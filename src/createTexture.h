@@ -5,13 +5,20 @@
 GLuint create_texture(const char* image_path, bool b_mipmap)
 {
 	// load the image with vertical flipping
-	image* img = cg_load_image(image_path); if (!img) return -1;
+	bool flag = false;
+	if (image_path == "../bin/images/explosion.png")// 폭발 효과만을 위해 따로 분리
+		flag = true;
+	
+	image* img = cg_load_image(image_path, flag); if (!img) return -1;
 	int w = img->width, h = img->height;
 
-	// create a src texture (lena texture)
+	// create a src texture
 	GLuint texture; glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, img->ptr);
+	if (image_path == "../bin/images/explosion.png")// 폭발 효과만을 위해 따로 분리
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->ptr);
+	else
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, img->ptr);
 	if (img) delete img; // release image
 
 	// build mipmap

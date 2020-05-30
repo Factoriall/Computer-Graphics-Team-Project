@@ -19,5 +19,4 @@ uniform sampler2D	TEX;
 void main()
 {
 		fragColor = b_solid_color ? solid_color : texture(TEX, tc);
-
 }

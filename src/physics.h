@@ -4,7 +4,7 @@
 #define __PHYSICS_H__
 #include "object.h"
 
-const float gravity = 12.3f;			// 중력값 계수
+float		gravity = 12.3f;			// 중력값 계수
 float		angle_const = 4.3f;			// 구 회전속도 계수		
 
 // const 충격 흡수량

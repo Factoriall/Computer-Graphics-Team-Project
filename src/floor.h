@@ -37,7 +37,7 @@ inline std::vector<rect_t> create_floors() //function to save the information ab
 	std::vector<rect_t> floors;
 	rect_t f;
 
-	f = { vec3(0, 0 , -5.0f), vec2(30.0f, 10.0f), vec3(1.0f, 0, 0), PI / 2.0f };
+	f = { vec3(0, 0 , -5.0f), vec2(30.0f, 30.0f), vec3(1.0f, 0, 0), PI / 2.0f };
 	floors.emplace_back(f);
 
 
