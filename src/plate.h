@@ -32,6 +32,16 @@ void plate_t::make_plate(vec3 _center, vec3 _scale, int _type) {
 	rect[5] = { _center + vec3(0, 0, _scale.z / 2.0f), vec2(_scale.x,_scale.y), vec3(0), 0 };
 }
 
+void plate_t::update_plate() {
+	rect[0] = { center - vec3(0, 0, scale.z / 2.0f), vec2(scale.x,scale.y), vec3(0), 0 };
+	rect[1] = { center - vec3(scale.x / 2.0f, 0, 0), vec2(scale.z, scale.y), vec3(0, 1, 0), PI / 2 };
+	rect[2] = { center - vec3(0, 0, scale.z / 2.0f), vec2(scale.x, scale.z), vec3(1, 0, 0), PI / 2 };
+	rect[3] = { center + vec3(scale.x / 2.0f, 0, 0), vec2(scale.z, scale.y), vec3(0, 1, 0),  PI / 2 };
+	rect[4] = { center - vec3(0  , -scale.y, scale.z / 2.0f), vec2(scale.x, scale.z), vec3(1, 0, 0), PI / 2 };
+	rect[5] = { center + vec3(0, 0, scale.z / 2.0f), vec2(scale.x,scale.y), vec3(0), 0 };
+}
+
+
 // render function
 void render_plate(GLuint program, std::vector<plate_t>& plates) {
 	for (auto& c : plates) {

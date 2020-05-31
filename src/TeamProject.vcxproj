@@ -58,6 +58,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="space.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />

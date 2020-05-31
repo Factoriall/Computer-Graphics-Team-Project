@@ -14,6 +14,7 @@
 #include "text.h"		// text
 #include "storm.h"		// 히오스 배너
 #include "particle.h"
+#include "space.h"		// 배경 
 
 //*************************************
 // global constants
@@ -35,7 +36,7 @@ trackball	tb_dev, tb_play;			// trackball for devlopment
 
 //*************************************
 // 설정용 변수
-bool		sound_on = false;			// 사운드 효과 on - off
+bool		sound_on = true;			// 사운드 효과 on - off
 bool		is_debug_mode = false;		// 디버깅모드 on - off
 int			collision_type = 0;			// 충돌 타입
 float		game_speed = 1.0f;			// 게임의 전체적인 속도 조절 (기본값 x1.0)
@@ -89,6 +90,7 @@ void update()
 	update_time();		// 시간정보 갱신
 	update_fps();		// fps 갱신
 	update_camera();	// 카메라 위치와 시야 갱신
+	update_space(space, del_t);
 
 	if (collision_type == 7)
 	{
@@ -171,13 +173,17 @@ void render()
 	// clear screen (with background color) and clear depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
-	
+
+	render_space(program, space);
 	render_wall(program, walls);
 	render_floor(program, floors);
+		
+	
 	render_plate(program, plates);
 	render_sphere(program, sphere, del_t);
 	render_storm(program, storm, del_t);
 	render_introBoard(program, introBoard);
+	
 	if (!sphere.is_moving) {
 		render_pointer(program, pointer, jp.get_gauge(t));
 	}
@@ -381,7 +387,7 @@ void motion( GLFWwindow* window, double x, double y )
 bool user_init()
 {
 	
-	if (sound_on && sound_init()) {
+	if (sound_on && (sound_on = sound_init())) {
 		// 각 음원의 볼륨 조정
 		sound_wall_src->setDefaultVolume(0.3f);
 		sound_plate_src->setDefaultVolume(0.2f);
@@ -411,6 +417,7 @@ bool user_init()
 	update_circle_vertex_buffer(unit_circle_vertices);
 	std::vector<vertex> unit_particle_vertices = create_particle_vertices();
 	update_particle_vertex_buffer(unit_particle_vertices);
+	
 
 	// assign texture to each components.
 	Plate1Texture = create_texture(plate1_image_path, true);
@@ -419,6 +426,7 @@ bool user_init()
 	Plate4Texture = create_texture(plate4_image_path, true);
 
 	SphereTexture = create_texture(sphere_image_path, true);
+	SpaceTexture = create_texture(space_image_path, true);
 	WallTexture = create_texture(brick_image_path, true);
 	FloorTexture = create_texture(floor_image_path, true);
 	IntroTexture = create_texture(intro_image_path, true);

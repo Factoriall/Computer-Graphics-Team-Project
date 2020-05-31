@@ -2,6 +2,8 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
+float more_view_angle = 0.0f;
+vec3  cam_away = vec3(0, 5.0f, 15.0f);
 // camera structure
 struct camera
 {
@@ -21,8 +23,9 @@ struct camera
 
 // implement fuction
 void camera::update(vec3 sphere_center) {
-	eye.y = sphere_center.y + 4.0f;
+	eye.y = sphere_center.y + cam_away.y;
 	eye.x = sphere_center.x;	// 눈이 공 따라가게
+	eye.z = cam_away.z + more_view_angle;
 	at = sphere_center;
 	view_matrix = mat4::look_at(eye, at, up);
 }

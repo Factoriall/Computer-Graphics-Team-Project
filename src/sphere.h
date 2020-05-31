@@ -66,8 +66,7 @@ void render_sphere(GLuint program, sphere_t & sphere, float del_t) {
 
 // creating object functions
 inline sphere_t create_sphere() {
-	// return { vec3(11.0f, 58.0f, 1.0f), 0.5f, 0}; µğ¹ö±ë¿ë
-	return { vec3(0.0f, 1.0f, 1.0f), 0.5f, 0};
+	return { vec3(0.0f, 1.0f, 2.0f), 0.5f, 0};
 }
 
 sphere_t	sphere = create_sphere();

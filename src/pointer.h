@@ -45,7 +45,7 @@ void pointer_t::update(sphere_t & sp) {
 // creating object functions
 inline pointer_t create_pointer() //function to save the information about walls - 3 walls
 {
-	return { vec3(0, 0.0f, 1.0f), 0.4f, 0 };
+	return { vec3(0, 0.0f, 1.0f), 0.6f, 0 };
 }
 
 pointer_t	pointer = create_pointer();

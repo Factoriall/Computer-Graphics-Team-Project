@@ -22,7 +22,9 @@ irrklang::ISoundSource* sound_plate_src = nullptr;
 bool	sound_init() {
 	// create engine
 	engine = irrklang::createIrrKlangDevice();
-	if (!engine) return false;
+	if (!engine) {
+		return false;
+	}
 
 	//add sound source from the sound file
 	// sound_src =		  engine->addSoundSourceFromFile(colision_sound_path);
