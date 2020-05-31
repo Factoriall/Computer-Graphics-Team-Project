@@ -55,7 +55,7 @@ int			frame = 0;					// 프레임 카운트 변수
 int			fps = 0;					// Frame Per Second, 초당 프레임 수
 float		fps_count_time = 0.0f;		// fps 측정 기준 시간
 float		play_time = 0;
-float		end = 0.0f;
+float		end = 0.0f;					// 게임 4단계 돌입 직후 시간저장
 
 // 시간계산 관련 변수
 float		t;							// 현재 시간
@@ -66,7 +66,8 @@ bool		input_click = false;
 int			last_colide = 0;			// 최근에 밟은 발판 확인 용
 std::string	status;						// 현재 상태 표시
 vec3		status_color = vec3(0.0f);
-float		blink_text;
+float		blink_text;					// 깜빡이는 텍스트
+
 
 void set_status(int type) {
 	if (type == 5) {
@@ -108,6 +109,32 @@ void update_time() {
 	t = float(glfwGetTime());  // now time
 	del_t = min(t - last_t, 0.1f) * game_speed;
 	last_t = t;
+}
+void game_reset() {
+	reset_camera();
+	//reset_floor();
+	//reset_wall();
+	reset_intro_state();
+	//reset_plate();
+	reset_sphere();
+	reset_storm();
+	reset_status();
+
+	number_of_jump = 0;			// 점프 횟수 카운트 변수
+	frame = 0;					// 프레임 카운트 변수
+	fps = 0;					// Frame Per Second, 초당 프레임 수
+	fps_count_time = 0.0f;		// fps 측정 기준 시간
+	play_time = 0;
+	end = 0.0f;
+
+	game_mod = 0;
+}
+
+void automatic_reset() {
+	if (t-end > 4.0f) {
+		game_mod = -1;
+		game_reset();
+	}
 }
 //*************************************
 void update()
@@ -166,15 +193,20 @@ void update()
 		last_colide = collision_type;
 	}
 
-	// 점프 발판용 추가 코딩
-	if (!sphere.is_moving && last_colide==7) {
-		power = (float)basic_power * 1.6f;
-		more_view_angle = 18.0f;
-		cam_away.y = 2;
-	}
+	
 
-	// 포인터를 구에 고정
-	if(game_mod==1) pointer.center = sphere.center;
+	
+	if (game_mod == 1) {
+		// 포인터를 구에 고정
+		pointer.center = sphere.center;
+
+		// 점프 발판용 추가 코딩
+		if (!sphere.is_moving && last_colide == 7) {
+			power = (float)basic_power * 1.6f;
+			more_view_angle = 18.0f;
+			cam_away.y = 2;
+		}
+	}
 
 	if (game_mod == 1 && storm.in_storm(sphere.center, sphere.radius)) {
 		printf("system : 폭풍속으로~\n");
@@ -195,6 +227,9 @@ void update()
 	}
 	if (game_mod == 3) {
 		for (auto& p : particles) p.update();
+	}
+	if (game_mod == 4) {
+		automatic_reset();
 	}
 	
 	
@@ -246,8 +281,8 @@ void render()
 	}
 	
 	if (game_mod == 3) {
-		render_text("WIN!!", window_size.x/2-60, window_size.y/2+50, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-		render_text("Click to finish", window_size.x / 2 - 130, window_size.y / 2 + 130, 0.6f, vec4(1.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("WIN!!", window_size.x/2-70, window_size.y/2+50, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("Click to finish", window_size.x / 2 - 130, window_size.y / 2 + 130, 0.6f, vec4(1.0f, 0.0f, 0.0f, blink_text), dpi_scale);
 	}
 	if (game_mod == 4) {
 		float dpi_scale = cg_get_dpi_scale();
@@ -277,25 +312,7 @@ void reshape( GLFWwindow* window, int width, int height )
 	glViewport( 0, 0, width, height );
 }
 
-void game_reset() {
-	reset_camera();
-	//reset_floor();
-	//reset_wall();
-	reset_intro_state();
-	//reset_plate();
-	reset_sphere();
-	reset_storm();
-	reset_status();
 
-	number_of_jump = 0;			// 점프 횟수 카운트 변수
-	frame = 0;					// 프레임 카운트 변수
-	fps = 0;					// Frame Per Second, 초당 프레임 수
-	fps_count_time = 0.0f;		// fps 측정 기준 시간
-	play_time = 0;
-	end = 0.0f;
-
-	game_mod = 0;
-}
 
 void print_help()
 {
@@ -303,7 +320,6 @@ void print_help()
 	printf( "- press 'q' to terminate the program\n" );
 	printf( "- press 'ESC' to pause the program\n");
 	printf( "- press F1 or 'h' to see help\n" );
-	//printf("- press F2 to see how to play\n");
 	printf("- press 'TAB' to switch debug mode\n");
 	printf("- press 'Z' to reset camera (debug mode only)\n");
 	printf("- press 'R' to reset game\n");
