@@ -8,12 +8,12 @@ float		gravity = 12.3f;			// 중력값 계수
 float		angle_const = 4.3f;			// 구 회전속도 계수		
 
 // const 충격 흡수량
-vec2		floor_elasticity = vec2(0.30f);			// 바닥
+vec2		floor_elasticity = vec2(0.35f);			// 바닥
 vec2		wall_elasticity = vec2(0.13f);			// 벽
-vec2		plate_elasticity = vec2(0.33f);			// 기본 발판
-vec2		plate2_elasticity = vec2(0.06f, 0.5f);	// 얼음 발판
+vec2		plate_elasticity = vec2(0.43f, 0.43f);	// 기본 발판
+vec2		plate2_elasticity = vec2(0.05f, 0.5f);	// 얼음 발판
 vec2		plate3_elasticity = vec2(0.9f, 0.9f);	// 끈끈이 발판
-vec2		plate4_elasticity = vec2(0.33f, 0.33f);	// 점프 발판
+vec2		plate4_elasticity = vec2(0.43f, 0.43f);	// 점프 발판
 
 
 // collide fuction

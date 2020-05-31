@@ -41,6 +41,8 @@ void jp_t::jump_action(sphere_t& sp) {
 	sp.x_speed += gauge * cos(angle);
 	sp.y_speed += gauge * sin(angle);
 	power = basic_power;					// 원래 파워로 복구
+	more_view_angle = 0;					// 원래 시야로 복구
+	cam_away.y = 5;							// 원래 시야로 복구
 	printf("Jump!  gauge: %f, v(x, y) = %.2f, %.2f\n", gauge, sp.x_speed, sp.y_speed);
 };
 float jp_t::get_gauge(float t) {

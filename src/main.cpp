@@ -62,8 +62,30 @@ float		t;							// 현재 시간
 float		last_t;						// 이전 시간
 float		del_t;						// del_t = t - last_t
 
-bool input_click = false;
+bool		input_click = false;
+int			last_colide = 0;			// 최근에 밟은 발판 확인 용
+std::string	status;						// 현재 상태 표시
+vec3		status_color = vec3(0.0f);
+float		blink_text;
 
+void set_status(int type) {
+	if (type == 5) {
+		status = std::string("SLIPPERY !!");
+		status_color = vec3(0.1f, 0.1f, 1);
+	}
+	else if (type == 6) {
+		status = std::string("STICKY !!");
+		status_color = vec3(0.1f, 1, 0.1f);
+	}
+	else if (type == 7) {
+		status = std::string("POWERFUL !!");
+		status_color = vec3(1.0f, 0.1f, 0.1f);
+	}
+}
+void reset_status() {
+	status = std::string("-");
+	status_color = vec3(0);
+}
 void update_fps() {
 	// 대략 1초마다 fps 값을 갱신한다.
 	if (play_time - fps_count_time > 1.0f) {
@@ -98,6 +120,8 @@ void update()
 		update_fps();		// fps 갱신	
 	}
 
+
+	// 인트로 담당, game_mod 0 -> 1 과정을 담당함
 	if (game_mod == 0) {
 		game_mod = running_intro(del_t, input_click);
 		input_click = false;
@@ -107,46 +131,48 @@ void update()
 	}
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
-	if (game_mod == 1 && (collision_type = sphere.collision(floors, walls, plates, del_t)) && sound_on) {
-		
+	if (game_mod == 1 && (collision_type = sphere.collision(floors, walls, plates, del_t))) {
 		if (collision_type == 1) {
 			// collide with sample
-			engine->play2D(sound_src, false);
-			printf("sound : (무언가 부딧힌 소리)\n");
+			if(sound_on) engine->play2D(sound_src, false);
 		}
 		else if (collision_type == 2) {
 			// collide with floor
-			engine->play2D(sound_floor_src, false);
-			printf("sound : (잔디 밟는 소리)\n");
+			if (sound_on) engine->play2D(sound_floor_src, false);
 		}
 		else if (collision_type == 3) {
 			// collide with wall
-			engine->play2D(sound_wall_src, false);
-			printf("sound : (벽과 부딧힌 소리)\n");
+			if (sound_on) engine->play2D(sound_wall_src, false);
 		}
 		else if (collision_type == 4) {
 			// collide with normal plate
-			engine->play2D(sound_plate_src, false);
-			printf("sound : (발판 밟는 소리)\n");
+			if (sound_on) engine->play2D(sound_plate_src, false);
 		}
 		else if (collision_type == 5) {
 			// collide with  ice plate
-			//engine->play2D(sound_plate_src, false);
-			printf("sound : (발판 밟는 소리)\n");
+			// if(sound_on) engine->play2D(sound_plate_src, false);
+			set_status(5);
 		}
 		else if (collision_type == 6) {
 			// collide with sticky plate
-			//engine->play2D(sound_plate_src, false);
-			printf("sound : (발판 밟는 소리)\n");
+			// if(sound_on) engine->play2D(sound_plate_src, false);
+			set_status(6);
 		}
 		else if (collision_type == 7) {
 			// collide with jump plate
-			//engine->play2D(sound_plate_src, false);
-			power = (float)basic_power * 1.6f;
-			printf("sound : (발판 밟는 소리)\n");
+			// if (sound_on) engine->play2D(sound_plate_src, false);
+			set_status(7);
 		}
+		last_colide = collision_type;
 	}
-	
+
+	// 점프 발판용 추가 코딩
+	if (!sphere.is_moving && last_colide==7) {
+		power = (float)basic_power * 1.6f;
+		more_view_angle = 18.0f;
+		cam_away.y = 2;
+	}
+
 	// 포인터를 구에 고정
 	if(game_mod==1) pointer.center = sphere.center;
 
@@ -203,14 +229,17 @@ void render()
 	
 	// render texts
 	float dpi_scale = cg_get_dpi_scale();
+	blink_text = abs(sin(t * 2.3f));
 	if (game_mod == 0) {
-		if(intro_next_text_ready) render_text("Click to next", window_size.x/2 -190, window_size.y / 2+160, 1.1f, vec4(1.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		if(intro_next_text_ready) render_text("Click to next", window_size.x/2 -190, window_size.y / 2+160, 1.1f, vec4(1.0f, 0.0f, 0.0f, blink_text), dpi_scale);
 	}
 	if (game_mod == 1) {
-		render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-		render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-		render_text((std::string(str_play_time) + std::to_string(play_time += del_t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-		render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("Statics", 20, 50, 0.5f, vec4(1.0f), dpi_scale);
+		render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(1.0f), dpi_scale);
+		render_text((std::string(str_play_time) + std::to_string(play_time += del_t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(1.0f), dpi_scale);
+		render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(1.0f), dpi_scale);
+		render_text("Status : ", 20, 160, 0.6f, vec4(1.0f), dpi_scale);
+		render_text(status, 170, 160, 0.6f, vec4(status_color, blink_text), dpi_scale);
 	}
 	if(game_mod == 2){
 	
@@ -341,6 +370,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			jp.endTime = float(glfwGetTime());
 			jp.jumpping_now = false;
 			jp.jump_action(sphere);
+			reset_status();
 			number_of_jump++;
 		}
 	}
