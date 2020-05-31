@@ -74,7 +74,8 @@ void update_fps() {
 }
 void update_camera() {
 	// 카메라 matrix 계산
-	if(game_mod!=3) cam_for_play.update(sphere.center);
+	if (game_mod == 1) cam_for_play.update(sphere.center);
+	else if(game_mod == 2) cam_for_play.update();
 
 	// update projection matrix
 	cam_now->aspect_ratio = window_size.x / float(window_size.y);
@@ -156,7 +157,7 @@ void update()
 		cam_at = cam_for_play.at;
 		del_cam_at = storm.center - cam_at;
 		cam_eye = cam_for_play.eye;
-		del_cam_eye = storm.center + vec3(0, 0, 5) - cam_eye;
+		del_cam_eye = storm.center + vec3(0, 0, 3) - cam_eye;
 		game_mod = 2;	// 게임 모드 변경 (충돌함수가 동작하지 않게 끔)
 	}
 	if (game_mod == 2) {

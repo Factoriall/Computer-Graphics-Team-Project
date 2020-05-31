@@ -60,7 +60,7 @@ int circle_t::go_to_storm(sphere_t & sp, camera & cam, float del_t) {
 inline circle_t create_storm() //function to save the information about walls - 3 walls
 {
 	return { vec3(0.0f, 64.0f, 1.0f), 1.0f, 0.0f};	// 맵 위에 생성
-	//return { vec3(2.0f, 2.0f, 0.3f), 1.0f, 0.0f };		// 바로 옆에 생성
+	//return { vec3(2.0f, 2.0f, 2.0f), 1.0f, 0.0f };		// 바로 옆에 생성
 }
 
 circle_t		storm = create_storm();

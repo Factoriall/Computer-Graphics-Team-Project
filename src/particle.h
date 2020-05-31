@@ -11,6 +11,8 @@ static const char* particle_image_path = "../bin/images/explosion.png";
 
 inline float random_range(float min, float max) { return mix(min, max, rand() / float(RAND_MAX)); }
 
+// vec3 storm_target;
+
 struct particle_t
 {
 	static constexpr int MAX_PARTICLES = 200;
@@ -20,11 +22,13 @@ struct particle_t
 	vec2 velocity;
 	float scale;
 	float life;
+	
 
 	//optional
 	float elapsed_time;
 	float time_interval;
 
+	
 	particle_t() { reset(); }
 	void reset();
 	void update();
