@@ -4,11 +4,10 @@
 #include "object.h"
 
 // constant
-static const char* plate1_image_path = "../bin/images/plate.jpg";
-static const char* plate2_image_path = "../bin/images/plate2.jpg";
-static const char* plate3_image_path = "../bin/images/plate3.jpg";
-static const char* plate4_image_path = "../bin/images/plate4.jpg";
-
+static const char* plate1_image_path = "../bin/images/rock.png";
+static const char* plate2_image_path = "../bin/images/ice.jpg";
+static const char* plate3_image_path = "../bin/images/sticky.jpg";
+static const char* plate4_image_path = "../bin/images/whitehole.jpg";
 // opengl variables
 GLuint	Plate1Texture = 0;
 GLuint	Plate2Texture = 0;

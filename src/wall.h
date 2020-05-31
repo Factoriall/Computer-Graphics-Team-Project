@@ -4,7 +4,7 @@
 #include "object.h"
 
 // constants
-static const char* brick_image_path = "../bin/images/brick.jpg";
+static const char* brick_image_path = "../bin/images/lava.png";
 
 // opengl variables
 GLuint	WallTexture = 0;

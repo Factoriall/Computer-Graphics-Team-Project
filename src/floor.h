@@ -4,7 +4,7 @@
 #include "object.h"
 
 // constant
-static const char* floor_image_path = "../bin/images/floor.jpg";
+static const char* floor_image_path = "../bin/images/lava_floor.png";
 
 // opengl variables
 GLuint	FloorTexture = 0;
