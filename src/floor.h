@@ -46,4 +46,7 @@ inline std::vector<rect_t> create_floors() //function to save the information ab
 
 auto		floors = std::move(create_floors());
 
+void reset_floor() {
+
+}
 #endif 

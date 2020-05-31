@@ -65,4 +65,12 @@ inline circle_t create_storm() //function to save the information about walls - 
 
 circle_t		storm = create_storm();
 
+void reset_storm() {
+	sphere_pos = 0;		// 구를 폭풍쪽으로 이동
+	del_sphere_pos = 0;
+	cam_at = 0;			// 카메라를 폭풍쪽으로 이동
+	del_cam_at = 0;
+	cam_eye = 0;			// 카메라를 폭풍쪽으로 이동
+	del_cam_eye = 0;
+}
 #endif 

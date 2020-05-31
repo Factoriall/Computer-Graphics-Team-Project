@@ -150,4 +150,7 @@ inline std::vector<plate_t> create_plates() {
 
 auto		plates = std::move(create_plates());
 
+void reset_plate() {
+
+}
 #endif 

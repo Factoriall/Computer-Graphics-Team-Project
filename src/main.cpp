@@ -8,7 +8,7 @@
 #include "pointer.h"	// pointer
 #include "sphere.h"		// sphere
 #include "wall.h"		// wall
-#include "intro.h"		// intro
+#include "intro.h"		// intro 기능
 #include "sound.h"		// sound
 #include "physics.h"	// physics
 #include "text.h"		// text
@@ -62,6 +62,8 @@ float		t;							// 현재 시간
 float		last_t;						// 이전 시간
 float		del_t;						// del_t = t - last_t
 
+bool input_click = false;
+
 void update_fps() {
 	// 대략 1초마다 fps 값을 갱신한다.
 	if (play_time - fps_count_time > 1.0f) {
@@ -88,18 +90,24 @@ void update_time() {
 void update()
 {
 	update_time();		// 시간정보 갱신
-	update_fps();		// fps 갱신
+	update_space(space, del_t);	// 움직이는 배경
 	update_camera();	// 카메라 위치와 시야 갱신
-	update_space(space, del_t);
 
-	if (collision_type == 7)
-	{
-		power = (float)basic_power * 1.6f;
+	if (game_mod != 0) {
+		update_fps();		// fps 갱신	
 	}
-	//printf("%f\n", power); 파워 체크
+
+	if (game_mod == 0) {
+		game_mod = running_intro(del_t, input_click);
+		input_click = false;
+		if (game_mod == 1) {
+			cam_now = &cam_for_play;
+		}
+	}
 
 	// 공 충돌계산과 충돌물체 간의 사운드 재생
 	if (game_mod == 1 && (collision_type = sphere.collision(floors, walls, plates, del_t)) && sound_on) {
+		
 		if (collision_type == 1) {
 			// collide with sample
 			engine->play2D(sound_src, false);
@@ -133,12 +141,13 @@ void update()
 		else if (collision_type == 7) {
 			// collide with jump plate
 			//engine->play2D(sound_plate_src, false);
+			power = (float)basic_power * 1.6f;
 			printf("sound : (발판 밟는 소리)\n");
 		}
 	}
-
+	
 	// 포인터를 구에 고정
-	pointer.center = sphere.center;
+	if(game_mod==1) pointer.center = sphere.center;
 
 	if (game_mod == 1 && storm.in_storm(sphere.center, sphere.radius)) {
 		printf("system : 폭풍속으로~\n");
@@ -175,30 +184,35 @@ void render()
 	glEnable(GL_BLEND);
 
 	render_space(program, space);
-	render_wall(program, walls);
-	render_floor(program, floors);
-		
-	
-	render_plate(program, plates);
-	render_sphere(program, sphere, del_t);
-	render_storm(program, storm, del_t);
-	render_introBoard(program, introBoard);
-	
-	if (!sphere.is_moving) {
-		render_pointer(program, pointer, jp.get_gauge(t));
+	if (game_mod == 0) {
+		if(intro_descriptor_index != -1)render_introBoard(program);
+		if (intro_logo) render_introLogo(program, introLogo);
 	}
-	
+
+	if (game_mod >= 1 && game_mod < 4) {
+		render_wall(program, walls);
+		render_floor(program, floors);
+		render_plate(program, plates);
+		render_sphere(program, sphere, del_t);
+		render_storm(program, storm, del_t);
+		if (!sphere.is_moving) {
+			render_pointer(program, pointer, jp.get_gauge(t));
+		}
+	}
 	
 	// render texts
 	float dpi_scale = cg_get_dpi_scale();
 	if (game_mod == 0) {
-		render_text("Click to start!", window_size.x / 3, window_size.y * 3 / 4, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		if(intro_next_text_ready) render_text("Click to next", window_size.x/2 -190, window_size.y / 2+160, 1.1f, vec4(1.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	}
 	if (game_mod == 1) {
 		render_text("Statics", 20, 50, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 		render_text((std::string("FPS : ") + std::to_string(fps)).c_str(), 20, 75, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 		render_text((std::string(str_play_time) + std::to_string(play_time += del_t).substr(0, 4).c_str()), 20, 100, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 		render_text((std::string(str_number_of_jump) + std::to_string(number_of_jump)).c_str(), 20, 125, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+	}
+	if(game_mod == 2){
+	
 	}
 	
 	if (game_mod == 3) {
@@ -232,15 +246,35 @@ void reshape( GLFWwindow* window, int width, int height )
 	glViewport( 0, 0, width, height );
 }
 
+void game_reset() {
+	reset_camera();
+	//reset_floor();
+	//reset_wall();
+	reset_intro_state();
+	//reset_plate();
+	reset_sphere();
+	reset_storm();
+
+	number_of_jump = 0;			// 점프 횟수 카운트 변수
+	frame = 0;					// 프레임 카운트 변수
+	fps = 0;					// Frame Per Second, 초당 프레임 수
+	fps_count_time = 0.0f;		// fps 측정 기준 시간
+	play_time = 0;
+	end = 0.0f;
+
+	game_mod = 0;
+}
+
 void print_help()
 {
 	printf( "[help]\n" );
 	printf( "- press 'q' to terminate the program\n" );
 	printf( "- press 'ESC' to pause the program\n");
 	printf( "- press F1 or 'h' to see help\n" );
-	printf("- press F2 to see how to play\n");
+	//printf("- press F2 to see how to play\n");
 	printf("- press 'TAB' to switch debug mode\n");
 	printf("- press 'Z' to reset camera (debug mode only)\n");
+	printf("- press 'R' to reset game\n");
 	printf( "\n" );
 }
 
@@ -266,8 +300,12 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			game_speed = !game_speed;
 		}
 		else if (key == GLFW_KEY_F2) {
-			printf(" > show intro\n");
-			cam_now = &cam_intro;
+			//printf(" > show intro\n");
+			//cam_now = &cam_intro;
+		}
+		else if (key == GLFW_KEY_R) {
+			game_mod = -1;
+			game_reset();
 		}
 
 		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) { // jump charge start
@@ -310,16 +348,7 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 {
 	if(button==GLFW_MOUSE_BUTTON_LEFT&&action==GLFW_PRESS )
 	{
-		dvec2 pos; glfwGetCursorPos(window,&pos.x,&pos.y);
-		printf( "> Left mouse button pressed at (%d, %d)\n", int(pos.x), int(pos.y) );
-		if (game_mod == 0) {
-			game_mod = 1;
-			cam_now = &cam_for_play;
-		}
-		if (game_mod == 3) {
-			game_mod = 4;
-			end = float(glfwGetTime());
-		}
+		if(!input_click) input_click = true;
 	}
 	
 
@@ -429,22 +458,29 @@ bool user_init()
 	SpaceTexture = create_texture(space_image_path, true);
 	WallTexture = create_texture(brick_image_path, true);
 	FloorTexture = create_texture(floor_image_path, true);
-	IntroTexture = create_texture(intro_image_path, true);
+	//IntroTexture = create_texture(intro_image_path, true);
 	PointerTexture = create_texture(pointer_image_path, true);
 	StormTexture = create_texture(storm_image_path, true);
 	ParticleTexture = create_texture(particle_image_path, false);
-
-
+	LogoTexture = create_texture(logo_image_path, true);
+	IntroTexture[0] = create_texture(intro_image_path[0], true);
+	IntroTexture[1] = create_texture(intro_image_path[1], true);
+	IntroTexture[2] = create_texture(intro_image_path[2], true);
+	
 	// setup freetype
 	if (!init_text()) return false;
 
 	particles.resize(particle_t::MAX_PARTICLES);
 
-	cam_intro.eye = vec3(30.0f, 3.75f, 9.3f);
-	cam_intro.at = vec3(30.0f, 3.75f, 0);
+	// 시작 카메라
+	cam_intro.eye = vec3(0, 0, 10.0f);
+	cam_intro.at = vec3(0, 0, 0);
 	cam_intro.update();
 
+
+	// 게임 제어 변수 초기화
 	game_mod = 0;
+	intro_state = 0;
 
 	return true;
 }

@@ -71,4 +71,10 @@ inline sphere_t create_sphere() {
 
 sphere_t	sphere = create_sphere();
 
+void reset_sphere() {
+	sphere = create_sphere();
+	jp.jumpping_now = false;
+	jp.startTime = 0.0f;
+	jp.endTime = 0.0f;
+}
 #endif 
