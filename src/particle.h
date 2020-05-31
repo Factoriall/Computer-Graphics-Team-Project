@@ -15,7 +15,7 @@ struct particle_t
 {
 	static constexpr int MAX_PARTICLES = 200;
 
-	vec2 pos;
+	vec3 pos;
 	vec4 color;
 	vec2 velocity;
 	float scale;
@@ -32,7 +32,7 @@ struct particle_t
 
 inline void particle_t::reset()
 {
-	pos = vec2(random_range(-5.0f, 5.0f), random_range(60.0f, 68.0f));
+	pos = vec3(random_range(-5.0f, 5.0f), random_range(60.0f, 68.0f), 0.5f);
 	color = vec4(random_range(0, 1.0f), random_range(0, 1.0f), random_range(0, 1.0f), 1);
 	scale = random_range(0.5f, 1.5f);
 	life = 1.0f;
@@ -72,7 +72,7 @@ void render_particle(GLuint program, std::vector<particle_t>& particles) {
 	glEnable(GL_BLEND);
 	for (auto& p : particles)
 	{
-		mat4 translate_matrix = mat4::translate(vec3(p.pos.x, p.pos.y, 0));
+		mat4 translate_matrix = mat4::translate(vec3(p.pos.x, p.pos.y, p.pos.z));
 		mat4 scale_matrix = mat4::scale(p.scale);
 		mat4 model_matrix = translate_matrix * scale_matrix;
 

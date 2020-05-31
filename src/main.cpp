@@ -222,9 +222,10 @@ void render()
 	if (game_mod == 4) {
 		float dpi_scale = cg_get_dpi_scale();
 		float ct = float(glfwGetTime());
-		render_text("Ending Credit", 100, GLint((float(ct - end) * 30.0f)), 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
-		render_text("I love Computer Graphics!", 100, GLint((ct - end) * 30.0f) + 25, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
-		render_text("Creater: Nam, Bae, Byeon", 100, GLint((ct - end) * 30.0f) + 50, 0.6f, vec4(0.5f, 0.7f, 0.7f, 0.8f), dpi_scale);
+		render_text("Ending Credit", 100, GLint(float(ct - end) * window_size.y / 4.0f), 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
+		render_text("I love Computer Graphics!", 100, GLint(float(ct - end) * window_size.y / 4.0f) + 25, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
+		render_text("Creater: Nam, Bae, Byeon", 100, GLint(float(ct - end) * window_size.y / 4.0f) + 50, 0.6f, vec4(0.5f, 0.7f, 0.7f, 0.8f), dpi_scale);
+		render_text("Thank you for playing!!!", 100, GLint(float(ct - end) * window_size.y / 4.0f) + 75, 0.6f, vec4(1.0f, 1.0f, 1.0f, 0.8f), dpi_scale);
 	}
 	
 	// notify GL that we use our own program
@@ -349,6 +350,10 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 	if(button==GLFW_MOUSE_BUTTON_LEFT&&action==GLFW_PRESS )
 	{
 		if(!input_click) input_click = true;
+		if (game_mod == 3) {
+			game_mod = 4;
+			end = float(glfwGetTime());
+		}
 	}
 	
 
