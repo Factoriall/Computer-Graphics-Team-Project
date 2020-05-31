@@ -45,7 +45,7 @@ float		game_speed = 1.0f;			// 게임의 전체적인 속도 조절 (기본값 x1.0)
 	1 - 게임 중
 	2 - 폭풍속으로
 	3 - 폭발 이펙트
-	4 - 아웃트로
+	4 - 아웃트로 (엔딩 크레딧)
 */
 int			game_mod = 0;
 
@@ -217,8 +217,8 @@ void render()
 	}
 	
 	if (game_mod == 3) {
-		render_text("WIN!!", window_size.x/2-70, window_size.y/2+70, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
-		render_text("Click to finish", window_size.x / 3, window_size.y * 3 / 4, 0.5f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("WIN!!", window_size.x/2-60, window_size.y/2+50, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("Click to finish", window_size.x / 2 - 130, window_size.y / 2 + 130, 0.6f, vec4(1.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 	}
 	if (game_mod == 4) {
 		float dpi_scale = cg_get_dpi_scale();
