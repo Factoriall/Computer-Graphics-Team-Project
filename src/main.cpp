@@ -285,6 +285,7 @@ void game_reset() {
 	//reset_plate();
 	reset_sphere();
 	reset_storm();
+	reset_status();
 
 	number_of_jump = 0;			// 점프 횟수 카운트 변수
 	frame = 0;					// 프레임 카운트 변수
