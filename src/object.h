@@ -65,8 +65,9 @@ struct circle_t {
 	vec3	center = vec3(0);
 	float	scale = 1.0f;
 	float	angle = 0.0f;
-	float	angle_speed = 0.6f;
 	float	proceed = 0;
+	float	angle_speed = 0.6f;
+	
 	bool	in_storm(vec3 sp_center, float sp_r);
 	int		go_to_storm(sphere_t& sp, camera& cam, float del_t);
 };

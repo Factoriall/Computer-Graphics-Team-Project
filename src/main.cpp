@@ -222,7 +222,6 @@ void update()
 	}
 
 	if (game_mod == 1 && storm.in_storm(sphere.center, sphere.radius)) {
-		printf("system : ÆøÇ³¼ÓÀ¸·Î~\n");
 		sphere_pos = sphere.center;
 		del_sphere_pos = storm.center - sphere_pos;
 		cam_at = cam_for_play.at;

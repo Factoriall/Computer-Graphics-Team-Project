@@ -26,7 +26,6 @@ struct jp_t {//jump 게이지 표현
 // implement fuctions
 void sphere_t::update(float del_t) {
 	angle += angle_speed * del_t;
-	// angle_speed -= angle_speed * 0.1f * del_t; 연구 중
 
 	model_matrix = mat4::translate(center) *
 		mat4::rotate(vec3(0, 0, 1), angle) *
@@ -43,7 +42,6 @@ void jp_t::jump_action(sphere_t& sp) {
 	power = basic_power;					// 원래 파워로 복구
 	more_view_angle = 0;					// 원래 시야로 복구
 	cam_away.y = 5;							// 원래 시야로 복구
-	printf("Jump!  gauge: %f, v(x, y) = %.2f, %.2f\n", gauge, sp.x_speed, sp.y_speed);
 };
 float jp_t::get_gauge(float t) {
 	return  jumpping_now ? min((t - startTime)/charge_range + min_charge_time, max_charge_time) : 0;
