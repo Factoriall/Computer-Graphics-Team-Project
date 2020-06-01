@@ -81,7 +81,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	*/
 	int		is_collide = 0;						// 충돌 대상 정보, return 값
 	vec3	p0 = center;						// 이전 구 좌표 저장
-	float	maximum_friction =  0.5f * del_t;	// 이동거리에 따른 정지 판정 기준 
+	float	maximum_friction =  0.55f * del_t;	// 이동거리에 따른 정지 판정 기준 
 	y_speed -= gravity * del_t;					// 중력 적용
 
 	vec3	pn = p0 + vec3(x_speed, y_speed, 0) * del_t;	// 공의 다음 위치 계산
@@ -162,7 +162,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 왼쪽면과 충돌 처리
 			center.x = pl_x - plsize_x - radius;
-			if (abs(p0.x - center.x) > maximum_friction) is_collide = 4;
+			if (abs(p0.x - center.x) > maximum_friction) is_collide = 3 + plates.type;
 			if (x_speed > 0) {
 				x_speed = -x_speed;
 			}
@@ -181,7 +181,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 아랫면과 충돌 처리
 			center.y = pl_y - plsize_y - radius;
-			if (abs(p0.y - center.y) > maximum_friction) is_collide = 4;
+			if (abs(p0.y - center.y) > maximum_friction) is_collide = 3 + plates.type;
 			if (y_speed > 0) {
 				y_speed = -y_speed;
 			}
@@ -199,7 +199,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 		{
 			// 오른쪽 면과 충돌 처리
 			center.x = pl_x + plsize_x + radius;
-			if (abs(p0.x - center.x) > maximum_friction) is_collide = 4;
+			if (abs(p0.x - center.x) > maximum_friction) is_collide = 3 + plates.type;
 			if (x_speed < 0) {
 				x_speed = -x_speed;
 			}
@@ -237,7 +237,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 				break;
 			}
 			center.y = pl_y + plsize_y + radius;
-			if (abs(p0.y - center.y) > maximum_friction) is_collide = 4 + plates.type - 1;
+			if (abs(p0.y - center.y) > maximum_friction) is_collide = 3 + plates.type;
 			if (y_speed < 0) {
 				y_speed = -y_speed;
 			}

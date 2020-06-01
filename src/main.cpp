@@ -67,9 +67,11 @@ int			last_colide = 0;			// 최근에 밟은 발판 확인 용
 std::string	status;						// 현재 상태 표시
 vec3		status_color = vec3(0.0f);
 float		blink_text;					// 깜빡이는 텍스트
+float		set_status_time;			// 스태이터스 자동 소멸
 
 
 void set_status(int type) {
+	set_status_time = 2.0f;
 	if (type == 5) {
 		status = std::string("SLIPPERY !!");
 		status_color = vec3(0.1f, 0.1f, 1);
@@ -86,6 +88,12 @@ void set_status(int type) {
 void reset_status() {
 	status = std::string("-");
 	status_color = vec3(0);
+}
+void automatic_reset_status(float del_t) {
+	set_status_time -= del_t;
+	if (set_status_time < 0) {
+		reset_status();
+	}
 }
 void update_fps() {
 	// 대략 1초마다 fps 값을 갱신한다.
@@ -128,10 +136,12 @@ void game_reset() {
 	end = 0.0f;
 
 	game_mod = 0;
+	if (sound_on) engine->stopAllSounds();
+	if (sound_on) engine->play2D(sound_intro_src, false);
 }
 
 void automatic_reset() {
-	if (t-end > 4.0f) {
+	if (t-end > 12.0f) {
 		game_mod = -1;
 		game_reset();
 	}
@@ -154,6 +164,8 @@ void update()
 		input_click = false;
 		if (game_mod == 1) {
 			cam_now = &cam_for_play;
+			if (sound_on) engine->stopAllSounds();
+			if (sound_on) engine->play2D(sound_playing_src, true);
 		}
 	}
 
@@ -173,21 +185,21 @@ void update()
 		}
 		else if (collision_type == 4) {
 			// collide with normal plate
-			if (sound_on) engine->play2D(sound_plate_src, false);
+			if (sound_on) engine->play2D(sound_plate_1_src, false);
 		}
 		else if (collision_type == 5) {
 			// collide with  ice plate
-			// if(sound_on) engine->play2D(sound_plate_src, false);
+			if (sound_on) engine->play2D(sound_plate_4_src, false);
 			set_status(5);
 		}
 		else if (collision_type == 6) {
 			// collide with sticky plate
-			// if(sound_on) engine->play2D(sound_plate_src, false);
+			if (sound_on) engine->play2D(sound_plate_3_src, false);
 			set_status(6);
 		}
 		else if (collision_type == 7) {
 			// collide with jump plate
-			// if (sound_on) engine->play2D(sound_plate_src, false);
+			if (sound_on) engine->play2D(sound_plate_2_src, false);
 			set_status(7);
 		}
 		last_colide = collision_type;
@@ -199,6 +211,7 @@ void update()
 	if (game_mod == 1) {
 		// 포인터를 구에 고정
 		pointer.center = sphere.center;
+		automatic_reset_status(del_t);
 
 		// 점프 발판용 추가 코딩
 		if (!sphere.is_moving && last_colide == 7) {
@@ -217,12 +230,16 @@ void update()
 		cam_eye = cam_for_play.eye;
 		del_cam_eye = storm.center + vec3(0, 0, 3) - cam_eye;
 		game_mod = 2;	// 게임 모드 변경 (충돌함수가 동작하지 않게 끔)
+		if (sound_on) engine->stopAllSounds();
+		if (sound_on) engine->play2D(sound_storm_src, false);
 	}
 	if (game_mod == 2) {
 		
 		// 폭풍속으로 들어가는 지구 구현
 		if (storm.go_to_storm(sphere, cam_for_play, del_t)) {
 			game_mod = 3;	// 최종단계 진입
+			if (sound_on) engine->stopAllSounds();
+			if (sound_on) engine->play2D(sound_bomb_src, false);
 		}
 	}
 	if (game_mod == 3) {
@@ -281,16 +298,16 @@ void render()
 	}
 	
 	if (game_mod == 3) {
-		render_text("WIN!!", window_size.x/2-70, window_size.y/2+50, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
+		render_text("WIN!!", window_size.x/2-120, window_size.y/2+50, 2.0f, vec4(0.0f, 0.0f, 0.0f, 1.0f), dpi_scale);
 		render_text("Click to finish", window_size.x / 2 - 130, window_size.y / 2 + 130, 0.6f, vec4(1.0f, 0.0f, 0.0f, blink_text), dpi_scale);
 	}
 	if (game_mod == 4) {
 		float dpi_scale = cg_get_dpi_scale();
-		float ct = float(glfwGetTime());
-		render_text("Ending Credit", 100, GLint(float(ct - end) * window_size.y / 4.0f), 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
-		render_text("I love Computer Graphics!", 100, GLint(float(ct - end) * window_size.y / 4.0f) + 25, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
-		render_text("Creater: Nam, Bae, Byeon", 100, GLint(float(ct - end) * window_size.y / 4.0f) + 50, 0.6f, vec4(0.5f, 0.7f, 0.7f, 0.8f), dpi_scale);
-		render_text("Thank you for playing!!!", 100, GLint(float(ct - end) * window_size.y / 4.0f) + 75, 0.6f, vec4(1.0f, 1.0f, 1.0f, 0.8f), dpi_scale);
+		float ct = (float(glfwGetTime()) - end ) * 0.3f;
+		render_text("Ending Credit", 100, GLint(ct * window_size.y / 4.0f), 1.0f, vec4(0.5f, 0.8f, 0.2f, 1.0f), dpi_scale);
+		render_text("I love Computer Graphics!", 100, GLint(ct * window_size.y / 4.0f) + 25, 0.5f, vec4(0.7f, 0.4f, 0.1f, 0.8f), dpi_scale);
+		render_text("Creater: Nam, Bae, Byeon", 100, GLint(ct * window_size.y / 4.0f) + 50, 0.6f, vec4(0.5f, 0.7f, 0.7f, 0.8f), dpi_scale);
+		render_text("Thank you for playing!!!", 100, GLint(ct * window_size.y / 4.0f) + 75, 0.6f, vec4(1.0f, 1.0f, 1.0f, 0.8f), dpi_scale);
 	}
 	
 	// notify GL that we use our own program
@@ -360,7 +377,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			jp.startTime = float(glfwGetTime());
 			jp.jumpping_now = true;
 		}
-		else if (is_debug_mode || true) {
+		else if (is_debug_mode) {
 			// debug mode only input
 			if(key == GLFW_KEY_Z) cam_for_dev = camera();
 			else if (key == GLFW_KEY_W) {
@@ -401,6 +418,8 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 		if (game_mod == 3) {
 			game_mod = 4;
 			end = float(glfwGetTime());
+			if (sound_on) engine->stopAllSounds();
+			if (sound_on) engine->play2D(sound_outro_src, false);
 		}
 	}
 	
@@ -471,8 +490,15 @@ bool user_init()
 	
 	if (sound_on && (sound_on = sound_init())) {
 		// 각 음원의 볼륨 조정
-		sound_wall_src->setDefaultVolume(0.3f);
-		sound_plate_src->setDefaultVolume(0.2f);
+		sound_wall_src->setDefaultVolume(0.7f);
+		sound_plate_1_src->setDefaultVolume(0.6f);
+		sound_plate_4_src->setDefaultVolume(0.4f);
+		sound_plate_3_src->setDefaultVolume(0.1f);
+		sound_playing_src->setDefaultVolume(0.25f);
+		sound_bomb_src->setDefaultVolume(0.6f);
+		sound_storm_src->setDefaultVolume(0.8f);
+		sound_intro_src->setDefaultVolume(0.4f);
+		sound_outro_src->setDefaultVolume(0.4f);
 	}
 	
 	// log hotkeys
@@ -534,6 +560,7 @@ bool user_init()
 	// 게임 제어 변수 초기화
 	game_mod = 0;
 	intro_state = 0;
+	if (sound_on) engine->play2D(sound_intro_src, false);
 
 	return true;
 }
