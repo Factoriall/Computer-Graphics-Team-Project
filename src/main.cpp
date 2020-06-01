@@ -70,6 +70,25 @@ float		blink_text;					// 깜빡이는 텍스트
 float		set_status_time;			// 스태이터스 자동 소멸
 
 
+
+void set_debug_mode() {
+	// 디버그 모드 시작
+	is_debug_mode = 1;
+	gravity = 0.0f;
+	cam_now = &cam_for_dev;
+	printf(" > mode change : now %s mode\n", is_debug_mode ? "debug" : "play");
+	printf("Hello debug mode!\n");
+	printf("You can use track ball and WASD movement\n");
+}
+void set_play_mode() {
+	// 디버그 모드 종료, 플레이 모드 시작
+	is_debug_mode = 0;
+	gravity = 12.3f;
+	cam_now = &cam_for_play;
+	printf(" > mode change : now %s mode\n", is_debug_mode ? "debug" : "play");
+}
+
+
 void set_status(int type) {
 	set_status_time = 2.0f;
 	if (type == 5) {
@@ -231,6 +250,7 @@ void update()
 		game_mod = 2;	// 게임 모드 변경 (충돌함수가 동작하지 않게 끔)
 		if (sound_on) engine->stopAllSounds();
 		if (sound_on) engine->play2D(sound_storm_src, false);
+		set_play_mode();
 	}
 	if (game_mod == 2) {
 		
@@ -336,9 +356,9 @@ void print_help()
 	printf( "- press 'q' to terminate the program\n" );
 	printf( "- press 'ESC' to pause the program\n");
 	printf( "- press F1 or 'h' to see help\n" );
+	printf("- press 'R' to reset game\n");
 	printf("- press 'TAB' to switch debug mode\n");
 	printf("- press 'Z' to reset camera (debug mode only)\n");
-	printf("- press 'R' to reset game\n");
 	printf( "\n" );
 }
 
@@ -349,29 +369,17 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		if(key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
 		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();	
 		else if (key == GLFW_KEY_TAB) {
-			if (is_debug_mode) {
-				gravity = 12.3f;
-				cam_now = &cam_for_play;
+			if (game_mod == 1 || game_mod == 2) {
+				is_debug_mode ? set_play_mode() : set_debug_mode();
 			}
-			else {
-				gravity = 0.0f;
-				cam_now = &cam_for_dev;
-			}
-			is_debug_mode = !is_debug_mode;
-			printf(" > mode change : %s mode now\n", is_debug_mode ? "debug" : "play" );
 		}
 		else if (key == GLFW_KEY_ESCAPE) {
 			game_speed = !game_speed;
-		}
-		else if (key == GLFW_KEY_F2) {
-			//printf(" > show intro\n");
-			//cam_now = &cam_intro;
 		}
 		else if (key == GLFW_KEY_R) {
 			game_mod = -1;
 			game_reset();
 		}
-
 		else if (key == GLFW_KEY_SPACE && !sphere.is_moving) { // jump charge start
 			jp.startTime = float(glfwGetTime());
 			jp.jumpping_now = true;
