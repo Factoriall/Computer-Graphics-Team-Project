@@ -490,10 +490,11 @@ bool user_init()
 	
 	if (sound_on && (sound_on = sound_init())) {
 		// °¢ À½¿øÀÇ º¼·ý Á¶Á¤
-		sound_wall_src->setDefaultVolume(0.7f);
-		sound_plate_1_src->setDefaultVolume(0.6f);
-		sound_plate_4_src->setDefaultVolume(0.4f);
-		sound_plate_3_src->setDefaultVolume(0.1f);
+		sound_wall_src->setDefaultVolume(0.5f);
+		sound_plate_1_src->setDefaultVolume(0.64f); // Ã¶ÆÇ
+		sound_plate_2_src->setDefaultVolume(0.34f);	// Æø¹ß ¹ßÆÇ
+		sound_plate_3_src->setDefaultVolume(0.42f);
+		sound_plate_4_src->setDefaultVolume(0.37f);
 		sound_playing_src->setDefaultVolume(0.25f);
 		sound_bomb_src->setDefaultVolume(0.6f);
 		sound_storm_src->setDefaultVolume(0.8f);

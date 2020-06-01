@@ -81,7 +81,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	*/
 	int		is_collide = 0;						// 충돌 대상 정보, return 값
 	vec3	p0 = center;						// 이전 구 좌표 저장
-	float	maximum_friction =  0.55f * del_t;	// 이동거리에 따른 정지 판정 기준 
+	float	maximum_friction =  0.46f * del_t;	// 이동거리에 따른 정지 판정 기준 
 	y_speed -= gravity * del_t;					// 중력 적용
 
 	vec3	pn = p0 + vec3(x_speed, y_speed, 0) * del_t;	// 공의 다음 위치 계산
@@ -89,7 +89,7 @@ int		sphere_t::collision(std::vector <rect_t>& floors, std::vector <rect_t>& wal
 	if (floor_collide(pn.y, floors[0].center.y, radius))	//바닥과 충돌 시
 	{
 		center.y = floors[0].center.y + radius;
-		if (abs(p0.y - center.y) > maximum_friction) is_collide = 2;
+		if (abs(p0.y - center.y) > maximum_friction) is_collide = 3;
 		if (y_speed < 0) {
 			y_speed = -y_speed;
 		}
